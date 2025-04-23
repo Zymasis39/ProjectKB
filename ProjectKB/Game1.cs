@@ -47,8 +47,6 @@ namespace ProjectKB
 
             KBModules.ViewManager = new();
 
-            GameBoard.InitLevelReqs();
-
             _graphics.PreferredBackBufferWidth = KBModules.Config.displayWidth;
             _graphics.PreferredBackBufferHeight = KBModules.Config.displayHeight;
             _graphics.IsFullScreen = KBModules.Config.fullscreen;

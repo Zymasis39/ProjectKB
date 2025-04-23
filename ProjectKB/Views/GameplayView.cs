@@ -42,7 +42,7 @@ namespace ProjectKB.Views
                 board.RemoveFromDraw();
             }
 
-            board = new GameBoard();
+            board = new GameBoard(GamePreset.EXPERT);
             DLM.AddToLayer(board, 0);
         }
 
