@@ -19,6 +19,8 @@ namespace ProjectKB.Views
 
         private BMFTypesetData line1Typeset;
 
+        private BMFTypesetData versionTypeset;
+
         private List<BMFTypesetData> scoreTypesets;
 
         public MainMenuView()
@@ -40,6 +42,7 @@ namespace ProjectKB.Views
                 }
                 else scoreTypesets.Add(KBFonts.SAEADA_600_96.Typeset($"{i + 1} - ???"));
             }
+            versionTypeset = KBFonts.SAEADA_600_96.Typeset(KBModules.VERSION);
         }
 
         public void Draw()
@@ -63,6 +66,14 @@ namespace ProjectKB.Views
                         0f, Vector2.Zero, 0.25f, SpriteEffects.None, 0f);
                 }
                 y += 24;
+            }
+            x = 16;
+            y = vp.Height - (int)(line1Typeset.height * 0.25) - 16;
+            foreach (BMFTypesetGlyph glyph in versionTypeset.glyphs)
+            {
+                Vector2 position = glyph.offset.ToVector2() * 0.25f + new Vector2(x, y);
+                KBModules.SpriteBatch.Draw(glyph.texture, position, glyph.sourceRect, Color.White,
+                    0f, Vector2.Zero, 0.25f, SpriteEffects.None, 0f);
             }
         }
 
