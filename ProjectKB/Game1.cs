@@ -100,6 +100,17 @@ namespace ProjectKB
 
             KBModules.ViewManager.mainMenuView.OnLoadContent();
             KBModules.ViewManager.gameplayView.OnLoadContent();
+
+            Debug.WriteLine("Garbage rates per mode/level:");
+
+            for (int i = 0; i <= 20; i++)
+            {
+                Debug.WriteLine($"STANDARD {i}: {GamePreset.Get(GamePresetID.STANDARD).baseGarbage(i) * 1000 :f3}/s");
+            }
+            for (int i = 0; i <= 12; i++)
+            {
+                Debug.WriteLine($"EXPERT {i}: {GamePreset.Get(GamePresetID.EXPERT).baseGarbage(i) * 1000 :f3}/s");
+            }
         }
 
         protected override void Update(GameTime gameTime)

@@ -42,7 +42,7 @@ namespace ProjectKB.Views
                 board.RemoveFromDraw();
             }
 
-            board = new GameBoard(GamePreset.EXPERT);
+            board = new GameBoard(GamePreset.Get(GamePresetID.EXPERT));
             DLM.AddToLayer(board, 0);
         }
 
@@ -128,7 +128,6 @@ namespace ProjectKB.Views
                 over = true;
                 GameResult result = board.GenerateResult();
                 result.SavePlaintextFile();
-
                 KBModules.ScoreBoard.AddScore(result, out _);
                 KBModules.ScoreBoard.Save();
             }

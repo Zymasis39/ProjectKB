@@ -9,6 +9,7 @@ namespace ProjectKB.Gameplay
 {
     public class GamePreset
     {
+        public GamePresetID id;
         public string name;
 
         public Func<double, double> levelReq;
@@ -97,51 +98,63 @@ namespace ProjectKB.Gameplay
                 new Color(245, 250, 255), new Color(41, 46, 51)),
         };
 
-        public static GamePreset STANDARD = new()
+        private static Dictionary<GamePresetID, GamePreset> list = new()
         {
-            name = "STANDARD",
-            levelReq = level => {
-                // nerf for levels above 4, becomes significant at 10-ish
-                if (level > 4) return Math.Pow(level, 2) * 6 + 16;
-                else return (Math.Pow(4 + level, 3) - 64) * 0.25;
+            { GamePresetID.STANDARD, new()
+                {
+                    id = GamePresetID.STANDARD,
+                    name = "STANDARD",
+                    levelReq = level => {
+                        // nerf for levels above 4, becomes significant at 10-ish
+                        if (level > 4) return Math.Pow(level, 2) * 6 + 16;
+                        else return (Math.Pow(4 + level, 3) - 64) * 0.25;
+                    },
+                    baseGarbage = level => (Math.Pow(10 + level, 2) - 100) * 0.0000025,
+                    extraGarbage = level => Math.Pow(Math.Pow(0.00025, 2) + Math.Pow((Math.Pow(10 + level, 2) - 100) * 0.0000025, 2), 0.5) / 3,
+                    garbageDelay = gr => 3 / (0.0005 + gr),
+                    firstExtraGarbageTime = 150000,
+                    extraGarbageInterval = 15000,
+                    scoreDecayRate = 1.0 / 600000,
+                    levelColors = STANDARD_LEVEL_COLORS
+                }
             },
-            baseGarbage = level => (Math.Pow(10 + level, 2) - 100) * 0.0000025,
-            extraGarbage = level => Math.Pow(Math.Pow(0.00025, 2) + Math.Pow((Math.Pow(10 + level, 2) - 100) * 0.0000025, 2), 0.5) / 3,
-            garbageDelay = gr => 3 / (0.0005 + gr),
-            firstExtraGarbageTime = 150000,
-            extraGarbageInterval = 15000,
-            scoreDecayRate = 1.0 / 600000,
-            levelColors = STANDARD_LEVEL_COLORS
+            { GamePresetID.MARATHON, new()
+                {
+                    id = GamePresetID.MARATHON,
+                    name = "MARATHON",
+                    levelReq = level => {
+                        // nerf for levels above 4, becomes significant at 10-ish
+                        if (level > 4) return Math.Pow(level, 2) * 24 + 64;
+                        else return (Math.Pow(4 + level, 3) - 64);
+                    },
+                    baseGarbage = level => (Math.Pow(10 + level, 2) - 100) * 0.0000025,
+                    extraGarbage = level => Math.Pow(Math.Pow(0.00025, 2) + Math.Pow((Math.Pow(10 + level, 2) - 100) * 0.0000025, 2), 0.5) / 3,
+                    garbageDelay = gr => 3 / (0.0005 + gr),
+                    firstExtraGarbageTime = 600000,
+                    extraGarbageInterval = 60000,
+                    scoreDecayRate = 1.0 / 2400000,
+                    levelColors = STANDARD_LEVEL_COLORS
+                }
+            },
+            { GamePresetID.EXPERT, new()
+                {
+                    id = GamePresetID.EXPERT,
+                    name = "EXPERT",
+                    levelReq = level => (Math.Pow(8 + level, 3) - 512),
+                    baseGarbage = level => (Math.Pow(24 + level, 3) - 6000) * 0.000000125,
+                    extraGarbage = level => Math.Pow(Math.Pow(0.00025, 2) + Math.Pow((Math.Pow(10 + level, 3) - 600) * 0.0000025, 2), 0.5) / 3,
+                    garbageDelay = gr => 3 / (0.001 + gr),
+                    firstExtraGarbageTime = 150000,
+                    extraGarbageInterval = 15000,
+                    scoreDecayRate = 1.0 / 600000,
+                    levelColors = EXPERT_LEVEL_COLORS
+                }
+            },
         };
 
-        public static GamePreset MARATHON = new()
+        public static GamePreset Get(GamePresetID id)
         {
-            name = "MARATHON",
-            levelReq = level => {
-                // nerf for levels above 4, becomes significant at 10-ish
-                if (level > 4) return Math.Pow(level, 2) * 24 + 64;
-                else return (Math.Pow(4 + level, 3) - 64);
-            },
-            baseGarbage = level => (Math.Pow(10 + level, 2) - 100) * 0.0000025,
-            extraGarbage = level => Math.Pow(Math.Pow(0.00025, 2) + Math.Pow((Math.Pow(10 + level, 2) - 100) * 0.0000025, 2), 0.5) / 3,
-            garbageDelay = gr => 3 / (0.0005 + gr),
-            firstExtraGarbageTime = 600000,
-            extraGarbageInterval = 60000,
-            scoreDecayRate = 1.0 / 2400000,
-            levelColors = STANDARD_LEVEL_COLORS
-        };
-
-        public static GamePreset EXPERT = new()
-        {
-            name = "EXPERT",
-            levelReq = level => (Math.Pow(8 + level, 3) - 512),
-            baseGarbage = level => (Math.Pow(12 + level, 3) - 1000) * 0.000001,
-            extraGarbage = level => Math.Pow(Math.Pow(0.00025, 2) + Math.Pow((Math.Pow(10 + level, 3) - 600) * 0.0000025, 2), 0.5) / 3,
-            garbageDelay = gr => 3 / (0.001 + gr),
-            firstExtraGarbageTime = 150000,
-            extraGarbageInterval = 15000,
-            scoreDecayRate = 1.0 / 600000,
-            levelColors = EXPERT_LEVEL_COLORS
-        };
+            return list[id];
+        }
     }
 }

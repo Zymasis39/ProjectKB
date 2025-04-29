@@ -35,9 +35,9 @@ namespace ProjectKB.Views
             line1Typeset = KBFonts.SAEADA_600_96.Typeset($"PRESS {KBModules.Config.keybinds[KeyAction.MenuEnter]} TO START");
             for (int i = 0; i < ScoreBoard.N_SCORES; i++)
             {
-                if (i < KBModules.ScoreBoard.scores.Count)
+                if (i < KBModules.ScoreBoard.scores[GamePresetID.EXPERT].Count)
                 {
-                    GameResult score = KBModules.ScoreBoard.scores[i];
+                    GameResult score = KBModules.ScoreBoard.scores[GamePresetID.EXPERT][i];
                     scoreTypesets.Add(KBFonts.SAEADA_600_96.Typeset($"{i + 1} - {score.playerName} - LEVEL {score.level:f3}"));
                 }
                 else scoreTypesets.Add(KBFonts.SAEADA_600_96.Typeset($"{i + 1} - ???"));

@@ -11,13 +11,19 @@ namespace ProjectKB.Modules
 {
     public class ScoreBoard
     {
-        private const int version = 1;
+        private const int version = 2;
 
-        public List<GameResult> scores = new();
+        public Dictionary<GamePresetID, List<GameResult>> scores = new();
 
         public const int N_SCORES = 10;
 
-        private ScoreBoard() { }
+        private ScoreBoard()
+        { 
+            foreach (var val in Enum.GetValues(typeof(GamePresetID)))
+            {
+                scores[(GamePresetID)val] = new List<GameResult>();
+            }
+        }
 
         public static ScoreBoard Load()
         {
@@ -27,11 +33,11 @@ namespace ProjectKB.Modules
             if (File.Exists(fn))
             {
                 byte[] data = File.ReadAllBytes(fn);
-                byte v = data[0];
-                int i = 1;
-                if (v == 1)
+                try
                 {
-                    try
+                    byte v = data[0];
+                    int i = 1;
+                    if (v == 1)
                     {
                         for (int j = 0; j < N_SCORES; j++)
                         {
@@ -43,19 +49,41 @@ namespace ProjectKB.Modules
                             double peakScore = StreamUtil.DoubleFromBytes(data, i, false);
                             double peakLevel = StreamUtil.DoubleFromBytes(data, i + 8, false);
                             double gameTime = StreamUtil.DoubleFromBytes(data, i + 16, false);
-                            GameResult score = new(timestamp, peakScore, peakLevel, gameTime, name);
-                            board.scores.Add(score);
+                            GameResult score = new(timestamp, GamePresetID.STANDARD, peakScore, peakLevel, gameTime, name);
+                            board.scores[GamePresetID.STANDARD].Add(score);
                             i += 24;
                         }
                     }
-                    catch (Exception e)
+                    else if (v == 2)
                     {
-                        Console.WriteLine("Error while loading scoreboard file.");
+                        while (i < data.Length)
+                        {
+                            GamePresetID preset = (GamePresetID)data[i++];
+                            int c = StreamUtil.Int32FromBytes(data, i, false);
+                            i += 4;
+                            for (int j = 0; j < c; j++)
+                            {
+                                DateTime timestamp = DateTime.FromBinary(StreamUtil.Int64FromBytes(data, i, false));
+                                int l = StreamUtil.Int32FromBytes(data, i + 8, false);
+                                string name = Encoding.UTF8.GetString(data, i + 12, l);
+                                i += 12 + l;
+                                double peakScore = StreamUtil.DoubleFromBytes(data, i, false);
+                                double peakLevel = StreamUtil.DoubleFromBytes(data, i + 8, false);
+                                double gameTime = StreamUtil.DoubleFromBytes(data, i + 16, false);
+                                GameResult score = new(timestamp, preset, peakScore, peakLevel, gameTime, name);
+                                board.scores[preset].Add(score);
+                                i += 24;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        Console.WriteLine("Unrecognized scoreboard file version.");
                     }
                 }
-                else
+                catch (Exception e)
                 {
-                    Console.WriteLine("Unrecognized scoreboard file version.");
+                    Console.WriteLine("Error while loading scoreboard file.");
                 }
             }
             else
@@ -67,11 +95,12 @@ namespace ProjectKB.Modules
 
         public void AddScore(GameResult score, out int i)
         {
+            List<GameResult> spp = scores[score.preset];
             i = 0;
-            while (i < scores.Count && scores[i].score > score.score) i++;
+            while (i < spp.Count && spp[i].score > score.score) i++;
             if (i == N_SCORES) return;
-            if (scores.Count == N_SCORES) scores.RemoveAt(N_SCORES - 1);
-            scores.Insert(i, score);
+            if (spp.Count == N_SCORES) spp.RemoveAt(N_SCORES - 1);
+            spp.Insert(i, score);
         }
 
         public void Save()
@@ -80,6 +109,7 @@ namespace ProjectKB.Modules
             if (File.Exists(fn)) File.Delete(fn);
             FileStream fs = File.OpenWrite(fn);
             fs.WriteByte(version);
+            /* v1
             for (int i = 0; i < N_SCORES && i < scores.Count; i++)
             {
                 GameResult score = scores[i];
@@ -90,6 +120,25 @@ namespace ProjectKB.Modules
                 fs.Write(StreamUtil.DoubleToBytes(score.score, false));
                 fs.Write(StreamUtil.DoubleToBytes(score.level, false));
                 fs.Write(StreamUtil.DoubleToBytes(score.gameTime, false));
+            }
+            */
+            // v2
+            foreach (var kvp in scores)
+            {
+                if (kvp.Value.Count == 0) continue;
+                fs.WriteByte((byte)kvp.Key);
+                fs.Write(StreamUtil.Int32ToBytes(kvp.Value.Count, false));
+                for (int i = 0; i < kvp.Value.Count; i++)
+                {
+                    GameResult score = kvp.Value[i];
+                    fs.Write(StreamUtil.Int64ToBytes(score.ts.ToBinary(), false));
+                    byte[] nameAsBytes = Encoding.UTF8.GetBytes(score.playerName);
+                    fs.Write(StreamUtil.Int32ToBytes(nameAsBytes.Length, false));
+                    fs.Write(nameAsBytes);
+                    fs.Write(StreamUtil.DoubleToBytes(score.score, false));
+                    fs.Write(StreamUtil.DoubleToBytes(score.level, false));
+                    fs.Write(StreamUtil.DoubleToBytes(score.gameTime, false));
+                }
             }
             fs.Close();
         }

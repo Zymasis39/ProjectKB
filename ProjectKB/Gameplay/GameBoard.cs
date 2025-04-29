@@ -58,7 +58,7 @@ namespace ProjectKB.Gameplay
             for (int i = 0; i < 20; i++)
             {
                 precalcLevelReqs.Add(preset.levelReq(i + 1));
-                Debug.WriteLine("Level " + (i + 1) + " req: " + preset.levelReq(i + 1));
+                //Debug.WriteLine("Level " + (i + 1) + " req: " + preset.levelReq(i + 1));
             }
         }
 
@@ -562,7 +562,7 @@ namespace ProjectKB.Gameplay
         {
             double prevLevelReq = level == 0 ? 0 : precalcLevelReqs[level - 1];
             double floatLevel = level + (peakScore - prevLevelReq) / (precalcLevelReqs[level] - prevLevelReq);
-            return new GameResult(peakScore, floatLevel, gameTime, KBModules.Config.playerName);
+            return new GameResult(preset.id, peakScore, floatLevel, gameTime, KBModules.Config.playerName);
         }
     }
 }
