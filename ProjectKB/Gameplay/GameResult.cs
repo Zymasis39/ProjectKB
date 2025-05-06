@@ -11,16 +11,18 @@ namespace ProjectKB.Gameplay
     public class GameResult
     {
         public readonly DateTime ts;
+        public readonly GamePresetID preset;
         public readonly double score;
         public readonly double level;
         public readonly double gameTime;
         public readonly string playerName;
 
-        public GameResult(double score, double level, double gameTime, string playerName) : this(DateTime.Now, score, level, gameTime, playerName) { }
+        public GameResult(GamePresetID preset, double score, double level, double gameTime, string playerName) : this(DateTime.Now, preset, score, level, gameTime, playerName) { }
 
-        public GameResult(DateTime ts, double score, double level, double gameTime, string playerName)
+        public GameResult(DateTime ts, GamePresetID preset, double score, double level, double gameTime, string playerName)
         {
             this.ts = ts;
+            this.preset = preset;
             this.score = score;
             this.level = level;
             this.gameTime = gameTime;
@@ -32,6 +34,7 @@ namespace ProjectKB.Gameplay
             List<string> lines = new()
             {
                 "Timestamp (UTC): " + ts.ToString(),
+                "Preset: " + preset.ToString(),
                 "Points: " + score,
                 "Level (as float): " + level,
                 "Duration (millis): " + (long)gameTime
