@@ -35,14 +35,14 @@ namespace ProjectKB.Views
             DLM.SetLayerEffect(2, KBEffects.RECOLOR);
         }
 
-        public void InitGame()
+        public void InitGame(GamePresetID presetId)
         {
             if (board != null)
             {
                 board.RemoveFromDraw();
             }
 
-            board = new GameBoard(GamePreset.Get(GamePresetID.EXPERT));
+            board = new GameBoard(GamePreset.Get(presetId));
             DLM.AddToLayer(board, 0);
         }
 
