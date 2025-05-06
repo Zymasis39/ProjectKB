@@ -19,4 +19,12 @@ The game, while in a somewhat playable state, is still very much a WIP.
 
 - To merge tiles, move a column or row so that a tile hits a wall, and another tile of the same tier hits it from behind. This clears garbage around the newly created tile, which itself is 1 tier higher than each of the merged tiles. When max-tier tiles are merged, the resulting tile is the same tier, but all garbage on the board is cleared.
 
-- Progress towards higher levels is gained by merging tiles, with higher-tier merges giving more progress, and decays over time, proportionally to current total progress. Each higher level requires more progress from the previous level, and causes more garbage to spawn. Staying on the same level for too long (2 minutes and 30 seconds) further increases the garbage spawn rate. (Level 0 has no garbage before 2:30 so you can get the hang of it without worrying about garbage.)
+- Progress towards higher levels is gained by merging tiles, with higher-tier merges giving more progress, and decays over time, proportionally to current total progress. Each higher level requires more progress from the previous level, and causes more garbage to spawn. Staying on the same level for too long (2 minutes and 30 seconds, or 10 minutes on MARATHON) further increases the garbage spawn rate. (Level 0 has no garbage before 2:30 so you can get the hang of it without worrying about garbage. Except on EXPERT, of course.)
+
+## Game presets
+
+- STANDARD - Recommended starting preset.
+
+- MARATHON - Like STANDARD, but progression is 4x slower (higher level thresholds, slower progress decay, slower garbage amp).
+
+- EXPERT - Significantly harder. Starts around the difficulty of STANDARD level 12, scales faster, and has 2x shorter garbage warning times.
