@@ -20,54 +20,19 @@ namespace ProjectKB.Gameplay
 
         public const int GAME_OVER = int.MaxValue;
 
-        private static Tuple<Color, Color>[] levelColors = new Tuple<Color, Color>[]
-        {
-            new Tuple<Color, Color>(
-                new Color(85, 85, 85), new Color(170, 170, 170)),
-            new Tuple<Color, Color>(
-                new Color(34, 119, 51), new Color(85, 204, 119)),
-            new Tuple<Color, Color>(
-                new Color(119, 34, 51), new Color(221, 85, 85)),
-            new Tuple<Color, Color>(
-                new Color(136, 85, 204), new Color(68, 17, 136)),
-            new Tuple<Color, Color>(
-                new Color(136, 136, 136), new Color(255, 255, 85)),
-            new Tuple<Color, Color>(
-                new Color(85, 187, 221), new Color(17, 34, 170)),
-            new Tuple<Color, Color>(
-                new Color(170, 68, 34), new Color(255, 238, 221)),
-            new Tuple<Color, Color>(
-                new Color(34, 255, 238), new Color(153, 255, 255)),
-            new Tuple<Color, Color>(
-                new Color(119, 0, 119), new Color(136, 102, 221)),
-            new Tuple<Color, Color>(
-                new Color(51, 204, 51), new Color(51, 51, 51)),
-            new Tuple<Color, Color>(
-                new Color(0, 51, 102), new Color(51, 170, 255)),
-            new Tuple<Color, Color>(
-                new Color(51, 0, 153), new Color(221, 204, 255)),
-            new Tuple<Color, Color>(
-                new Color(221, 102, 0), new Color(68, 17, 17)),
-            new Tuple<Color, Color>(
-                new Color(221, 221, 221), new Color(102, 34, 85)),
-            new Tuple<Color, Color>(
-                new Color(34, 68, 136), new Color(170, 255, 51)),
-            new Tuple<Color, Color>(
-                new Color(187, 187, 51), new Color(0, 68, 17)),
-            new Tuple<Color, Color>(
-                new Color(0, 68, 17), new Color(255, 34, 34)),
-            new Tuple<Color, Color>(
-                new Color(221, 119, 51), new Color(255, 255, 153)),
-            new Tuple<Color, Color>(
-                new Color(187, 204, 221), new Color(255, 255, 170)),
-            new Tuple<Color, Color>(
-                new Color(255, 219, 34), new Color(170, 255, 255)),
-            new Tuple<Color, Color>(
-                new Color(51, 51, 51), new Color(255, 136, 17)),
-        };
+        private static Tuple<Color, Color>[] levelColors;
 
         private static readonly Tuple<Color, Color> gameOverColors = new(
             new Color(17, 17, 17), Color.White);
+
+        public static void InitWithColors(Tuple<Color, Color>[] colors)
+        {
+            primary = Color.Black;
+            secondary = Color.Black;
+            lastPrimary = Color.Black;
+            lastSecondary = Color.Black;
+            levelColors = colors;
+        }
 
         public static void UpdateToLevel(int level, double delta)
         {

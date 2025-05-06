@@ -35,14 +35,14 @@ namespace ProjectKB.Views
             DLM.SetLayerEffect(2, KBEffects.RECOLOR);
         }
 
-        public void InitGame()
+        public void InitGame(GamePresetID presetId)
         {
             if (board != null)
             {
                 board.RemoveFromDraw();
             }
 
-            board = new GameBoard();
+            board = new GameBoard(GamePreset.Get(presetId));
             DLM.AddToLayer(board, 0);
         }
 
@@ -128,7 +128,6 @@ namespace ProjectKB.Views
                 over = true;
                 GameResult result = board.GenerateResult();
                 result.SavePlaintextFile();
-
                 KBModules.ScoreBoard.AddScore(result, out _);
                 KBModules.ScoreBoard.Save();
             }

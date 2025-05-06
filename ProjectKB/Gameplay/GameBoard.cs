@@ -49,48 +49,24 @@ namespace ProjectKB.Gameplay
         private double nextGarbageAtProgress = 1;
         private int gas = 0;
 
-        private const double scoreDecayRate = 1.0 / 600000;
+        private GamePreset preset;
 
-        private static double BaseGarbageRate(int level)
-        {
-            return (Math.Pow(10 + level, 2) - 100) * 0.0000025;
-        }
+        private List<double> precalcLevelReqs = new();
 
-        private static double ExtraGarbageRate(int level)
-        {
-            return Math.Pow(Math.Pow(0.00025, 2) + Math.Pow(BaseGarbageRate(level), 2), 0.5) / 3;
-        }
-
-        private static double GarbageDelayAtRate(double gr)
-        {
-            return 3 / (0.0005 + gr);
-        }
-
-        private const double firstExtraGarbageTime = 150000;
-        private const double extraGarbageInterval = 15000;
-
-        private static double LevelReq(double level)
-        {
-            // nerf for levels above 4, becomes significant at 10-ish
-            if (level > 4) return Math.Pow(level, 2) * 6 + 16;
-            else return (Math.Pow(4 + level, 3) - 64) * 0.25;
-        }
-
-        private static List<double> precalcLevelReqs = new();
-
-        public static void InitLevelReqs()
+        public void InitLevelReqs()
         {
             for (int i = 0; i < 20; i++)
             {
-                precalcLevelReqs.Add(LevelReq(i + 1));
-                Debug.WriteLine("Level " + (i + 1) + " req: " + LevelReq(i + 1));
+                precalcLevelReqs.Add(preset.levelReq(i + 1));
+                //Debug.WriteLine("Level " + (i + 1) + " req: " + preset.levelReq(i + 1));
             }
         }
 
-        public GameBoard()
+        public GameBoard(GamePreset preset)
         {
-            board = new GameTile[DIM*DIM];
-            garbageSpawns = new GarbageSpawn[DIM*DIM];
+            this.preset = preset;
+            board = new GameTile[DIM * DIM];
+            garbageSpawns = new GarbageSpawn[DIM * DIM];
 
             ind_hor = new(false, 2, new string[]
             {
@@ -101,7 +77,7 @@ namespace ProjectKB.Gameplay
                 KBModules.Config.keybinds[KeyAction.PickColumn5].ToString(),
             });
             ind_ver = new(true, 2, new string[]
-            {                
+            {
                 KBModules.Config.keybinds[KeyAction.PickRow1].ToString(),
                 KBModules.Config.keybinds[KeyAction.PickRow2].ToString(),
                 KBModules.Config.keybinds[KeyAction.PickRow3].ToString(),
@@ -116,9 +92,13 @@ namespace ProjectKB.Gameplay
 
             for (int i = 0; i < spawnQueueSize; i++) EnqueueSpawn();
 
-            garbageRate = BaseGarbageRate(0);
+            InitLevelReqs();
+
+            LevelColorAnimator.InitWithColors(preset.levelColors);
+
+            garbageRate = preset.baseGarbage(0);
             nextGarbageAtProgress = (KBModules.GameplayRNG.NextDouble() + 1) * 0.5;
-            nextExtraGarbageTime = firstExtraGarbageTime;
+            nextExtraGarbageTime = preset.firstExtraGarbageTime;
 
             TrySpawn();
         }
@@ -146,8 +126,8 @@ namespace ProjectKB.Gameplay
                 gas++;
                 garbageProgress += (nextExtraGarbageTime - (levelTime - gpDelta)) * garbageRate;
                 gpDelta = levelTime - nextExtraGarbageTime;
-                garbageRate += ExtraGarbageRate(level);
-                nextExtraGarbageTime += extraGarbageInterval;
+                garbageRate += preset.extraGarbage(level);
+                nextExtraGarbageTime += preset.extraGarbageInterval;
             }
             garbageProgress += gpDelta * garbageRate;
 
@@ -170,7 +150,7 @@ namespace ProjectKB.Gameplay
                 pgs.RemoveAt(ilgs);
                 int y = igs / DIM, x = igs % DIM;
 
-                garbageSpawns[y * DIM + x] = new(x, y, GarbageDelayAtRate(garbageRate));
+                garbageSpawns[y * DIM + x] = new(x, y, preset.garbageDelay(garbageRate));
                 // also code to handle the extreme case (massive lagspike in extremely high levels)
                 // of all 25 positions being occupied with garbage spawners
                 // or worse, 25 spawners being created at once with the same delay "wyd in this situation"
@@ -179,7 +159,7 @@ namespace ProjectKB.Gameplay
             }
 
             // score update (decay)
-            score *= Math.Pow(Math.E, -delta * scoreDecayRate);
+            score *= Math.Pow(Math.E, -delta * preset.scoreDecayRate);
             // scoreDisplay.UpdateTypeset(score, peakScore, level, gameTime, levelTime);
 
             double prevLevelReq = level == 0 ? 0 : precalcLevelReqs[level - 1];
@@ -212,9 +192,9 @@ namespace ProjectKB.Gameplay
                     level++;
                     levelTime = 0;
                     gas = 0;
-                    garbageRate = BaseGarbageRate(level);
-                    nextExtraGarbageTime = firstExtraGarbageTime;
-                    if (level == precalcLevelReqs.Count) precalcLevelReqs.Add(LevelReq(level + 1));
+                    garbageRate = preset.baseGarbage(level);
+                    nextExtraGarbageTime = preset.firstExtraGarbageTime;
+                    if (level == precalcLevelReqs.Count) precalcLevelReqs.Add(preset.levelReq(level + 1));
                 }
             }
             scoreBank = 0;
@@ -582,7 +562,7 @@ namespace ProjectKB.Gameplay
         {
             double prevLevelReq = level == 0 ? 0 : precalcLevelReqs[level - 1];
             double floatLevel = level + (peakScore - prevLevelReq) / (precalcLevelReqs[level] - prevLevelReq);
-            return new GameResult(peakScore, floatLevel, gameTime, KBModules.Config.playerName);
+            return new GameResult(preset.id, peakScore, floatLevel, gameTime, KBModules.Config.playerName);
         }
     }
 }
