@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using MySql.Data.MySqlClient;
 using ProjectKBShared.Model;
+using System.Data;
 
 namespace ProjectKBServer.Controllers
 {
@@ -34,15 +35,24 @@ namespace ProjectKBServer.Controllers
         }
 
         [HttpGet("{preset}")]
-        public string Get(byte preset)
+        public List<DBScore> Get(byte preset)
         {
             readCmd.Parameters.AddWithValue("@preset", preset);
 
-            string out_ = "";
+            List<DBScore> out_ = new();
             MySqlDataReader reader = readCmd.ExecuteReader();
             while (reader.Read())
             {
-                out_ += $"{reader.GetUInt64(0)} {reader.GetString(1)} {reader.GetByte(2)} {reader.GetString(3)} {reader.GetDateTime(4)} {reader.GetDouble(5)} {reader.GetDouble(6)}\n";
+                out_.Add(new DBScore()
+                {
+                    id = reader.GetUInt64(0),
+                    version = reader.GetString(1),
+                    preset = reader.GetByte(2),
+                    playerName = reader.GetString(3),
+                    timestamp = reader.GetDateTime(4),
+                    score = reader.GetDouble(5),
+                    level = reader.GetDouble(6)
+                });
             }
 
             return out_;
