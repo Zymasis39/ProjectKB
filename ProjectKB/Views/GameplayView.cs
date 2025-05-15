@@ -1,22 +1,36 @@
 ﻿using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using ProjectKB.Content;
 using ProjectKB.Draw;
+using ProjectKB.Font;
 using ProjectKB.Gameplay;
 using ProjectKB.Modules;
 using ProjectKB.Utils;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace ProjectKB.Views
 {
-    public class GameplayView : BaseView
+    public class GameplayView : BaseView, IKBDrawable
     {
         private GameBoard board;
         private int ox = 2, oy = 2;
         private bool paused = false, over = false;
+
+        private BMFTypesetData labelPaused;
+        private BMFTypesetData labelGameOver;
+        private BMFTypesetData labelSubmitScore;
+        private BMFTypesetData labelSubmitScoreSuccess;
+        private BMFTypesetData labelSubmitScoreError;
+        private BMFTypesetData labelPressExit;
+
+        private List<BMFTypesetData> topLines = new();
+
+        public DrawLayer layer { get; set; }
 
         public GameplayView()
         {
@@ -26,6 +40,7 @@ namespace ProjectKB.Views
                 new DrawLayer(),
                 new DrawLayer()
             );
+            DLM.AddToLayer(this, 3);
         }
 
         public override void OnLoadContent()
@@ -33,6 +48,13 @@ namespace ProjectKB.Views
             DLM.SetLayerEffect(0, KBEffects.RECOLOR);
             DLM.SetLayerEffect(1, KBEffects.RECOLOR);
             DLM.SetLayerEffect(2, KBEffects.RECOLOR);
+
+            labelPaused = KBFonts.SAEADA_600_96.Typeset("PAUSED");
+            labelGameOver = KBFonts.SAEADA_600_96.Typeset("GAME OVER");
+            labelSubmitScore = KBFonts.SAEADA_600_96.Typeset("SUBMITTING SCORE...");
+            labelSubmitScoreSuccess = KBFonts.SAEADA_600_96.Typeset("SCORE SUBMITTED");
+            labelSubmitScoreError = KBFonts.SAEADA_600_96.Typeset("ERROR SUBMITTING SCORE");
+            labelPressExit = KBFonts.SAEADA_600_96.Typeset($"PRESS {KBModules.Config.keybinds[KeyAction.Exit]} TO RETURN");
         }
 
         public void InitGame(GamePresetID presetId)
@@ -44,6 +66,10 @@ namespace ProjectKB.Views
 
             board = new GameBoard(GamePreset.Get(presetId));
             DLM.AddToLayer(board, 0);
+
+            over = false;
+            paused = false;
+            topLines = new();
         }
 
         public override void OnSwitch()
@@ -65,7 +91,20 @@ namespace ProjectKB.Views
                 int pox = ox, poy = oy;
                 if (ka == KeyAction.Pause)
                 {
-                    paused = !paused;
+                    if (!over)
+                    {
+                        paused = !paused;
+                        topLines.Clear();
+                        if (paused)
+                        {
+                            topLines.Add(labelPaused);
+                            topLines.Add(labelPressExit);
+                        }
+                    }
+                }
+                else if (ka == KeyAction.Exit)
+                {
+                    if (paused || over) KBModules.ViewManager.SwitchView(KBModules.ViewManager.mainMenuView);
                 }
                 if (paused || over) continue;
                 switch (ka)
@@ -126,10 +165,53 @@ namespace ProjectKB.Views
             if (board.CheckGameOver() && !over)
             {
                 over = true;
+                topLines.Add(labelGameOver);
+                topLines.Add(labelSubmitScore);
+                topLines.Add(labelPressExit);
                 GameResult result = board.GenerateResult();
                 result.SavePlaintextFile();
+                TrySubmitScore(result);
                 KBModules.ScoreBoard.AddScore(result, out _);
-                KBModules.ScoreBoard.Save();
+                KBModules.ScoreBoard.Save();                
+
+                KBModules.ViewManager.mainMenuView.reloadLocalScores = true;
+            }
+        }
+
+        private async Task TrySubmitScore(GameResult result)
+        {
+            try
+            {
+                await KBModules.ScoreApi.SubmitScore(result);
+                topLines[topLines.FindIndex(e => e == labelSubmitScore)] = labelSubmitScoreSuccess;
+                KBModules.ScoreBoard.scoresOnline[result.preset].a = FetchStatus.Outdated;
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine(ex);
+                topLines[topLines.FindIndex(e => e == labelSubmitScore)] = labelSubmitScoreError;
+            }
+        }
+
+        public void PrepDraw()
+        {
+            
+        }
+
+        public void Draw()
+        {
+            float y = 16;
+            foreach (var line in topLines)
+            {
+                Viewport vp = KBModules.GraphicsDeviceManager.GraphicsDevice.Viewport;
+                float x = (vp.Width - (line.width) * 0.25f) / 2;
+                foreach (BMFTypesetGlyph glyph in line.glyphs)
+                {
+                    Vector2 position = glyph.offset.ToVector2() * 0.25f + new Vector2(x, y);
+                    KBModules.SpriteBatch.Draw(glyph.texture, position, glyph.sourceRect, Color.White,
+                        0f, Vector2.Zero, 0.25f, SpriteEffects.None, 0f);
+                }
+                y += 24;
             }
         }
     }

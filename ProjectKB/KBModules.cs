@@ -11,10 +11,11 @@ namespace ProjectKB
 {
     public static class KBModules
     {
-        public const string VERSION = "V250506";
+        public const string VERSION = "V250515";
 
         public static Config Config;
         public static ScoreBoard ScoreBoard;
+        public static ScoreApi ScoreApi;
         
         public static KeyboardManager KeyboardManager;
         public static MouseManager MouseManager;

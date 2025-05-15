@@ -526,10 +526,15 @@ namespace ProjectKB.Gameplay
                 if (tile == null) continue;
                 tile.layer.RemoveFromLayer(tile);
             }
+            for (int i = 0; i < garbageSpawns.Length; i++)
+            {
+                GarbageSpawn gs = garbageSpawns[i];
+                if (gs != null) gs.layer.RemoveFromLayer(gs);
+            }
             ind_hor.layer.RemoveFromLayer(ind_hor);
             ind_ver.layer.RemoveFromLayer(ind_ver);
             ind_spawn.layer.RemoveFromLayer(ind_spawn);
-            scoreDisplay.layer.RemoveFromLayer(scoreDisplay);
+            scoreDisplayV2.layer.RemoveFromLayer(scoreDisplayV2);
         }
 
         public bool CheckGameOver()

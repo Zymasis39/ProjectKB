@@ -1,5 +1,6 @@
 ﻿using ProjectKB.Gameplay;
 using ProjectKB.Utils;
+using ProjectKBShared.Model;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -13,7 +14,8 @@ namespace ProjectKB.Modules
     {
         private const int version = 2;
 
-        public Dictionary<GamePresetID, List<GameResult>> scores = new();
+        public Dictionary<GamePresetID, List<GameResult>> scoresLocal = new();
+        public Dictionary<GamePresetID, Pair<FetchStatus, List<DBScore>>> scoresOnline = new();
 
         public const int N_SCORES = 10;
 
@@ -21,7 +23,8 @@ namespace ProjectKB.Modules
         { 
             foreach (var val in Enum.GetValues(typeof(GamePresetID)))
             {
-                scores[(GamePresetID)val] = new List<GameResult>();
+                scoresLocal[(GamePresetID)val] = new List<GameResult>();
+                scoresOnline[(GamePresetID)val] = new(FetchStatus.Outdated, new List<DBScore>());
             }
         }
 
@@ -50,7 +53,7 @@ namespace ProjectKB.Modules
                             double peakLevel = StreamUtil.DoubleFromBytes(data, i + 8, false);
                             double gameTime = StreamUtil.DoubleFromBytes(data, i + 16, false);
                             GameResult score = new(timestamp, GamePresetID.STANDARD, peakScore, peakLevel, gameTime, name);
-                            board.scores[GamePresetID.STANDARD].Add(score);
+                            board.scoresLocal[GamePresetID.STANDARD].Add(score);
                             i += 24;
                         }
                     }
@@ -71,7 +74,7 @@ namespace ProjectKB.Modules
                                 double peakLevel = StreamUtil.DoubleFromBytes(data, i + 8, false);
                                 double gameTime = StreamUtil.DoubleFromBytes(data, i + 16, false);
                                 GameResult score = new(timestamp, preset, peakScore, peakLevel, gameTime, name);
-                                board.scores[preset].Add(score);
+                                board.scoresLocal[preset].Add(score);
                                 i += 24;
                             }
                         }
@@ -95,7 +98,7 @@ namespace ProjectKB.Modules
 
         public void AddScore(GameResult score, out int i)
         {
-            List<GameResult> spp = scores[score.preset];
+            List<GameResult> spp = scoresLocal[score.preset];
             i = 0;
             while (i < spp.Count && spp[i].score > score.score) i++;
             if (i == N_SCORES) return;
@@ -123,7 +126,7 @@ namespace ProjectKB.Modules
             }
             */
             // v2
-            foreach (var kvp in scores)
+            foreach (var kvp in scoresLocal)
             {
                 if (kvp.Value.Count == 0) continue;
                 fs.WriteByte((byte)kvp.Key);

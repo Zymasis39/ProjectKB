@@ -13,6 +13,7 @@ namespace ProjectKBServer.Controllers
         private readonly MySqlConnection _conn;
 
         private MySqlCommand readCmd;
+        private MySqlCommand readAllCmd;
         private MySqlCommand writeCmd;
 
         public ScoreController(ILogger<ScoreController> logger,
@@ -25,13 +26,21 @@ namespace ProjectKBServer.Controllers
             readCmd.Connection = _conn;
             readCmd.CommandType = System.Data.CommandType.Text;
             readCmd.CommandText =
-                "SELECT `id`, `version`, `preset`, `playerName`, `timestamp`, `score`, `level` FROM `scores` WHERE `preset` = @preset ORDER BY `level` DESC LIMIT 10";
+                "SELECT `id`, `version`, `preset`, `playerName`, `timestamp`, `score`, `level` FROM `scores` WHERE `preset` = @preset ORDER BY `level` DESC LIMIT 10;";
+
+            readAllCmd = new();
+            readAllCmd.Connection = _conn;
+            readAllCmd.CommandType = System.Data.CommandType.Text;
+            readAllCmd.CommandText =
+                "SELECT `id`, `version`, `preset`, `playerName`, `timestamp`, `score`, `level` FROM `scores` WHERE `preset` = 1 ORDER BY `level` DESC LIMIT 10;"
+                + "SELECT `id`, `version`, `preset`, `playerName`, `timestamp`, `score`, `level` FROM `scores` WHERE `preset` = 2 ORDER BY `level` DESC LIMIT 10;"
+                + "SELECT `id`, `version`, `preset`, `playerName`, `timestamp`, `score`, `level` FROM `scores` WHERE `preset` = 3 ORDER BY `level` DESC LIMIT 10;";
 
             writeCmd = new();
             writeCmd.Connection = _conn;
             writeCmd.CommandType = System.Data.CommandType.Text;
             writeCmd.CommandText =
-                "INSERT INTO `scores` (`version`, `preset`, `playerName`, `timestamp`, `score`, `level`) VALUES (@version, @preset, @playerName, @timestamp, @score, @level)";
+                "INSERT INTO `scores` (`version`, `preset`, `playerName`, `timestamp`, `score`, `level`) VALUES (@version, @preset, @playerName, @timestamp, @score, @level);";
         }
 
         [HttpGet("{preset}")]
@@ -54,6 +63,39 @@ namespace ProjectKBServer.Controllers
                     level = reader.GetDouble(6)
                 });
             }
+            reader.Close();
+
+            return out_;
+        }
+
+        [HttpGet]
+        public List<DBScoresByPreset> Get()
+        {
+            List<DBScoresByPreset> out_ = new();
+            MySqlDataReader reader = readAllCmd.ExecuteReader();
+            byte preset = 1;
+            while (true)
+            {
+                List<DBScore> outPreset = new();
+                while (reader.Read())
+                {
+                    outPreset.Add(new DBScore()
+                    {
+                        id = reader.GetUInt64(0),
+                        version = reader.GetString(1),
+                        preset = reader.GetByte(2),
+                        playerName = reader.GetString(3),
+                        timestamp = reader.GetDateTime(4),
+                        score = reader.GetDouble(5),
+                        level = reader.GetDouble(6)
+                    });
+                }
+                out_.Add(new() { preset = preset, scores = outPreset });
+
+                if (!reader.NextResult()) break;
+                preset++;
+            }
+            reader.Close();
 
             return out_;
         }
@@ -61,6 +103,8 @@ namespace ProjectKBServer.Controllers
         [HttpPost]
         public void Post(DBScore score)
         {
+            MySqlTransaction t = _conn.BeginTransaction();
+
             writeCmd.Parameters.AddWithValue("@version", score.version);
             writeCmd.Parameters.AddWithValue("@preset", score.preset);
             writeCmd.Parameters.AddWithValue("@playerName", score.playerName);
@@ -69,6 +113,8 @@ namespace ProjectKBServer.Controllers
             writeCmd.Parameters.AddWithValue("@level", score.level);
 
             writeCmd.ExecuteNonQuery();
+
+            t.Commit();
         }
     }
 }

@@ -12,7 +12,8 @@ namespace ProjectKB.Modules
         {
             KeyAction.MenuDown,
             KeyAction.MenuUp,
-            KeyAction.MenuEnter
+            KeyAction.MenuEnter,
+            KeyAction.Exit
         };
 
         public static List<KeyAction> GameplayAbsolute = new() // Absolute refers to column selection
@@ -32,7 +33,8 @@ namespace ProjectKB.Modules
             KeyAction.PickRow3,
             KeyAction.PickRow4,
             KeyAction.PickRow5,
-            KeyAction.Pause
+            KeyAction.Pause,
+            KeyAction.Exit
         };
     }
 }

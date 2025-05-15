@@ -25,6 +25,7 @@ namespace ProjectKB.Modules
         Pause,
         MenuUp,
         MenuDown,
-        MenuEnter
+        MenuEnter,
+        Exit
     }
 }
