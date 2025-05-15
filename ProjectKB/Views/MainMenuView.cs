@@ -10,6 +10,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ProjectKB.Utils;
+using ProjectKBShared.Model;
+using System.Diagnostics;
 
 namespace ProjectKB.Views
 {
@@ -25,7 +28,16 @@ namespace ProjectKB.Views
 
         private BMFTypesetData versionTypeset;
 
-        private List<BMFTypesetData> scoreTypesets;
+        private List<BMFTypesetData> localScoreTypesets;
+        private List<BMFTypesetData> onlineScoreTypesets;
+        private BMFTypesetData labelLocalScores;
+        private BMFTypesetData labelOnlineScores;
+        private BMFTypesetData labelNoScores;
+        private BMFTypesetData labelLoading;
+        private BMFTypesetData labelErrorLoading;
+
+        public bool reloadLocalScores = true;
+        public bool reloadOnlineScores = true;
 
         public MainMenuView()
         {
@@ -33,7 +45,8 @@ namespace ProjectKB.Views
             DLM.AddToLayer(this, 0);
             presets = new List<GamePresetID>((GamePresetID[])Enum.GetValues(typeof(GamePresetID)));
             presetTypesets = new();
-            scoreTypesets = new();
+            localScoreTypesets = new();
+            onlineScoreTypesets = new();
         }
 
         public override void OnLoadContent()
@@ -43,25 +56,59 @@ namespace ProjectKB.Views
             {
                 presetTypesets.Add(KBFonts.SAEADA_600_96.Typeset(presets[i].ToString()));
             }
-            UpdateScoreTypesets(presets[selectedPresetIndex]);
             versionTypeset = KBFonts.SAEADA_600_96.Typeset(KBModules.VERSION);
+            labelLocalScores = KBFonts.SAEADA_600_96.Typeset("LOCAL SCORES");
+            labelOnlineScores = KBFonts.SAEADA_600_96.Typeset("ONLINE SCORES");
+            labelNoScores = KBFonts.SAEADA_600_96.Typeset("NO SCORES");
+            labelLoading = KBFonts.SAEADA_600_96.Typeset("LOADING SCORES...");
+            labelErrorLoading = KBFonts.SAEADA_600_96.Typeset("ERROR LOADING SCORES");
         }
 
-        private void UpdateScoreTypesets(GamePresetID presetId)
+        private void UpdateLocalScoreTypesets(GamePresetID presetId)
         {
-            scoreTypesets.Clear();
+            localScoreTypesets.Clear();
             for (int i = 0; i < ScoreBoard.N_SCORES; i++)
             {
-                if (i < KBModules.ScoreBoard.scores[presetId].Count)
+                if (i < KBModules.ScoreBoard.scoresLocal[presetId].Count)
                 {
-                    GameResult score = KBModules.ScoreBoard.scores[presetId][i];
-                    scoreTypesets.Add(KBFonts.SAEADA_600_96.Typeset($"{i + 1} - {score.playerName} - LEVEL {score.level:f3}"));
+                    GameResult score = KBModules.ScoreBoard.scoresLocal[presetId][i];
+                    localScoreTypesets.Add(KBFonts.SAEADA_600_96.Typeset($"{i + 1} - {score.playerName} - LEVEL {score.level:f3}"));
                 }
-                else scoreTypesets.Add(KBFonts.SAEADA_600_96.Typeset($"{i + 1} - ???"));
+                else localScoreTypesets.Add(KBFonts.SAEADA_600_96.Typeset($"{i + 1} - ???"));
             }
         }
 
-        public void Draw()
+        private void UpdateOnlineScoreTypesets(GamePresetID presetId)
+        {
+            onlineScoreTypesets.Clear();
+            switch (KBModules.ScoreBoard.scoresOnline[presetId].a)
+            {
+                case FetchStatus.UpToDate:
+                case FetchStatus.Outdated:
+                    int j = KBModules.ScoreBoard.scoresOnline[presetId].b.Count;
+                    if (j == 0)
+                    {
+                        onlineScoreTypesets.Add(labelNoScores);
+                    }
+                    else for (int i = 0; i < j; i++)
+                    {
+                        DBScore score = KBModules.ScoreBoard.scoresOnline[presetId].b[i];
+                        onlineScoreTypesets.Add(KBFonts.SAEADA_600_96.Typeset($"{i + 1} - {score.playerName} - LEVEL {score.level:f3}"));
+                    }
+                    break;
+                case FetchStatus.Loading:
+                    onlineScoreTypesets.Add(labelLoading);
+                    break;
+                case FetchStatus.Error:
+                case FetchStatus.Disabled:
+                    onlineScoreTypesets.Add(labelErrorLoading);
+                    break;
+            }
+            
+        }
+
+        public void Draw() // NOTE TO SELF PLEASE FOR THE CZECH'S SAKE REFACTOR THE DRAWING CODE
+            // YOU WENT TO SUCH GREAT LENGTHS WITH TYPESETTING AND THEN COPY AND PASTE THIS ABOMINATION OVER AND OVER FOR DRAWING
         {
             Viewport vp = KBModules.GraphicsDeviceManager.GraphicsDevice.Viewport;
             float x = 16, y = 16;
@@ -86,7 +133,35 @@ namespace ProjectKB.Views
                 i++;
             }
             y = 16;
-            foreach (BMFTypesetData typeset in scoreTypesets)
+            x = vp.Width - labelLocalScores.width * 0.25f - 16;
+            foreach (BMFTypesetGlyph glyph in labelLocalScores.glyphs)
+            {
+                Vector2 position = glyph.offset.ToVector2() * 0.25f + new Vector2(x, y);
+                KBModules.SpriteBatch.Draw(glyph.texture, position, glyph.sourceRect, Color.White,
+                    0f, Vector2.Zero, 0.25f, SpriteEffects.None, 0f);
+            }
+            y += 24;
+            foreach (BMFTypesetData typeset in localScoreTypesets)
+            {
+                x = vp.Width - typeset.width * 0.25f - 16;
+                foreach (BMFTypesetGlyph glyph in typeset.glyphs)
+                {
+                    Vector2 position = glyph.offset.ToVector2() * 0.25f + new Vector2(x, y);
+                    KBModules.SpriteBatch.Draw(glyph.texture, position, glyph.sourceRect, Color.White,
+                        0f, Vector2.Zero, 0.25f, SpriteEffects.None, 0f);
+                }
+                y += 24;
+            }
+            y += 8;
+            x = vp.Width - labelOnlineScores.width * 0.25f - 16;
+            foreach (BMFTypesetGlyph glyph in labelOnlineScores.glyphs)
+            {
+                Vector2 position = glyph.offset.ToVector2() * 0.25f + new Vector2(x, y);
+                KBModules.SpriteBatch.Draw(glyph.texture, position, glyph.sourceRect, Color.White,
+                    0f, Vector2.Zero, 0.25f, SpriteEffects.None, 0f);
+            }
+            y += 24;
+            foreach (BMFTypesetData typeset in onlineScoreTypesets)
             {
                 x = vp.Width - typeset.width * 0.25f - 16;
                 foreach (BMFTypesetGlyph glyph in typeset.glyphs)
@@ -110,6 +185,81 @@ namespace ProjectKB.Views
         public override void OnSwitch()
         {
             KBModules.KeyboardManager.LoadKeyActionList(KeyActionLists.Menu);
+            if (reloadLocalScores)
+            {
+                UpdateLocalScoreTypesets(presets[selectedPresetIndex]);
+                reloadLocalScores = false;
+            }
+            UpdateOnlineScores();
+        }
+
+        private async Task UpdateOnlineScores()
+        {
+            bool allOutdated = true;
+            foreach (var kvp in KBModules.ScoreBoard.scoresOnline)
+            {
+                if (kvp.Value.a != FetchStatus.Outdated) allOutdated = false;
+            }
+            if (allOutdated)
+            {                
+                foreach (var kvp in KBModules.ScoreBoard.scoresOnline)
+                {
+                    KBModules.ScoreBoard.scoresOnline[kvp.Key].a = FetchStatus.Loading;
+                }
+                UpdateOnlineScoreTypesets(presets[selectedPresetIndex]);
+                try
+                {
+                    var res = await KBModules.ScoreApi.GetScores();
+                    foreach (DBScoresByPreset s in res)
+                    {
+                        GamePresetID preset = (GamePresetID)s.preset;
+                        KBModules.ScoreBoard.scoresOnline[preset].a = FetchStatus.UpToDate;
+                        KBModules.ScoreBoard.scoresOnline[preset].b = s.scores;
+                    }
+                    UpdateOnlineScoreTypesets(presets[selectedPresetIndex]);
+                }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine(ex);
+                    foreach (var kvp in KBModules.ScoreBoard.scoresOnline)
+                    {
+                        KBModules.ScoreBoard.scoresOnline[kvp.Key].a = FetchStatus.Error;
+                    }
+                    UpdateOnlineScoreTypesets(presets[selectedPresetIndex]);
+                }
+            }
+            else
+            {
+                foreach (var kvp in KBModules.ScoreBoard.scoresOnline)
+                {
+                    if (KBModules.ScoreBoard.scoresOnline[kvp.Key].a == FetchStatus.Outdated)
+                    {
+                        UpdateOnlineScoresForPreset(kvp.Key);
+                    };
+                }
+            }
+        }
+
+        private async Task UpdateOnlineScoresForPreset(GamePresetID preset)
+        {
+            KBModules.ScoreBoard.scoresOnline[preset].a = FetchStatus.Loading;
+            if (preset == presets[selectedPresetIndex])
+                UpdateOnlineScoreTypesets(preset);
+            try
+            {
+                var res = await KBModules.ScoreApi.GetScoresByPreset(preset);
+                KBModules.ScoreBoard.scoresOnline[preset].a = FetchStatus.UpToDate;
+                KBModules.ScoreBoard.scoresOnline[preset].b = res;
+                if (preset == presets[selectedPresetIndex])
+                    UpdateOnlineScoreTypesets(preset);
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine(ex);
+                KBModules.ScoreBoard.scoresOnline[preset].a = FetchStatus.Error;
+                if (preset == presets[selectedPresetIndex])
+                    UpdateOnlineScoreTypesets(preset);
+            }
         }
 
         public void PrepDraw()
@@ -125,17 +275,23 @@ namespace ProjectKB.Views
                 if (ka == KeyAction.MenuDown)
                 {
                     selectedPresetIndex = (selectedPresetIndex + 1) % presets.Count;
-                    UpdateScoreTypesets(presets[selectedPresetIndex]);
+                    UpdateLocalScoreTypesets(presets[selectedPresetIndex]);
+                    UpdateOnlineScoreTypesets(presets[selectedPresetIndex]);
                 }
                 else if (ka == KeyAction.MenuUp)
                 {
                     selectedPresetIndex = (selectedPresetIndex + presets.Count - 1) % presets.Count;
-                    UpdateScoreTypesets(presets[selectedPresetIndex]);
+                    UpdateLocalScoreTypesets(presets[selectedPresetIndex]);
+                    UpdateOnlineScoreTypesets(presets[selectedPresetIndex]);
                 }
                 else if (ka == KeyAction.MenuEnter)
                 {
                     KBModules.ViewManager.SwitchView(KBModules.ViewManager.gameplayView);
                     KBModules.ViewManager.gameplayView.InitGame(presets[selectedPresetIndex]);
+                }
+                else if (ka == KeyAction.Exit)
+                {
+                    KBModules.ViewManager.Exit();
                 }
             }
         }

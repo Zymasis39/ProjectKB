@@ -1,0 +1,6 @@
+@ProjectKBServer_HostAddress = http://localhost:5162
+
+GET {{ProjectKBServer_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

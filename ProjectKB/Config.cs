@@ -45,7 +45,10 @@ namespace ProjectKB
             { KeyAction.MenuDown, Keys.Down },
             { KeyAction.MenuUp, Keys.Up },
             { KeyAction.MenuEnter, Keys.Enter },
+            { KeyAction.Exit, Keys.Escape },
         };
+
+        public string server = "DEFAULT";
 
         static Regex lineRegex = new(@"^(.+?)=(.+)$", RegexOptions.IgnoreCase);
         static Regex kvpRegex = new(@"^(.+?)=(.+)$", RegexOptions.IgnoreCase);
@@ -100,6 +103,9 @@ namespace ProjectKB
                                 case "PNAME":
                                     config.playerName = match.Groups[2].Value;
                                     break;
+                                case "SERVE":
+                                    config.server = match.Groups[2].Value;
+                                    break;
                             }
                         }
                         catch (Exception e)
@@ -144,6 +150,7 @@ namespace ProjectKB
             fs.Write(Encoding.ASCII.GetBytes("KEYS=" + keys + "\n"));
             fs.Write(Encoding.ASCII.GetBytes("FPS=" + fps.ToString() + "\n"));
             fs.Write(Encoding.ASCII.GetBytes("PNAME=" + playerName + "\n"));
+            fs.Write(Encoding.ASCII.GetBytes("SERVE=" + server + "\n"));
             fs.Close();
         }
 

@@ -37,6 +37,8 @@ namespace ProjectKB
 
             KBModules.ScoreBoard = ScoreBoard.Load();
 
+            KBModules.ScoreApi = new();
+
             TargetElapsedTime = TimeSpan.FromMilliseconds(1000 / KBModules.Config.fps);
 
             KBModules.KeyboardManager = new();
@@ -45,7 +47,7 @@ namespace ProjectKB
 
             KBModules.GameplayRNG = new();
 
-            KBModules.ViewManager = new();
+            KBModules.ViewManager = new(this);
 
             _graphics.PreferredBackBufferWidth = KBModules.Config.displayWidth;
             _graphics.PreferredBackBufferHeight = KBModules.Config.displayHeight;
@@ -111,15 +113,12 @@ namespace ProjectKB
             {
                 Debug.WriteLine($"EXPERT {i}: {GamePreset.Get(GamePresetID.EXPERT).baseGarbage(i) * 1000 :f3}/s");
             }
+
+            KBModules.ViewManager.SwitchView(KBModules.ViewManager.mainMenuView);
         }
 
         protected override void Update(GameTime gameTime)
         {
-            if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
-                Exit();
-
-            // TODO: Add your update logic here
-
             KBModules.ViewManager.currentView.Update(gameTime);
 
             base.Update(gameTime);
