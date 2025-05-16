@@ -26,15 +26,15 @@ namespace ProjectKBServer.Controllers
             readCmd.Connection = _conn;
             readCmd.CommandType = CommandType.Text;
             readCmd.CommandText =
-                "SELECT `id`, `version`, `preset`, `playerName`, `timestamp`, `score`, `level` FROM `scores` WHERE `preset` = @preset ORDER BY `level` DESC LIMIT 10;";
+                "SELECT t.`id`, t.`version`, t.`preset`, t.`playerName`, t.`timestamp`, t.`score`, t.`level` FROM (SELECT *, dense_rank() OVER (PARTITION BY playerName ORDER BY level DESC, id DESC) AS `rank` FROM `scores` WHERE `preset` = @preset) t WHERE t.`rank` = 1 ORDER BY t.`level` DESC LIMIT 10;";
 
             readAllCmd = new();
             readAllCmd.Connection = _conn;
             readAllCmd.CommandType = CommandType.Text;
             readAllCmd.CommandText =
-                "SELECT `id`, `version`, `preset`, `playerName`, `timestamp`, `score`, `level` FROM `scores` WHERE `preset` = 1 ORDER BY `level` DESC LIMIT 10;"
-                + "SELECT `id`, `version`, `preset`, `playerName`, `timestamp`, `score`, `level` FROM `scores` WHERE `preset` = 2 ORDER BY `level` DESC LIMIT 10;"
-                + "SELECT `id`, `version`, `preset`, `playerName`, `timestamp`, `score`, `level` FROM `scores` WHERE `preset` = 3 ORDER BY `level` DESC LIMIT 10;";
+                "SELECT t.`id`, t.`version`, t.`preset`, t.`playerName`, t.`timestamp`, t.`score`, t.`level` FROM (SELECT *, dense_rank() OVER (PARTITION BY playerName ORDER BY level DESC, id DESC) AS `rank` FROM `scores` WHERE `preset` = 1) t WHERE t.`rank` = 1 ORDER BY t.`level` DESC LIMIT 10;"
+                + "SELECT t.`id`, t.`version`, t.`preset`, t.`playerName`, t.`timestamp`, t.`score`, t.`level` FROM (SELECT *, dense_rank() OVER (PARTITION BY playerName ORDER BY level DESC, id DESC) AS `rank` FROM `scores` WHERE `preset` = 2) t WHERE t.`rank` = 1 ORDER BY t.`level` DESC LIMIT 10;"
+                + "SELECT t.`id`, t.`version`, t.`preset`, t.`playerName`, t.`timestamp`, t.`score`, t.`level` FROM (SELECT *, dense_rank() OVER (PARTITION BY playerName ORDER BY level DESC, id DESC) AS `rank` FROM `scores` WHERE `preset` = 3) t WHERE t.`rank` = 1 ORDER BY t.`level` DESC LIMIT 10;";
 
             writeCmd = new();
             writeCmd.Connection = _conn;
@@ -65,6 +65,7 @@ namespace ProjectKBServer.Controllers
                 });
             }
             reader.Close();
+            _conn.Close();
 
             return out_;
         }
@@ -98,6 +99,7 @@ namespace ProjectKBServer.Controllers
                 preset++;
             }
             reader.Close();
+            _conn.Close();
 
             return out_;
         }
@@ -118,6 +120,7 @@ namespace ProjectKBServer.Controllers
             writeCmd.ExecuteNonQuery();
 
             t.Commit();
+            _conn.Close();
         }
     }
 }
