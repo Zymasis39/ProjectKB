@@ -35,6 +35,7 @@ namespace ProjectKB.Views
         private BMFTypesetData labelNoScores;
         private BMFTypesetData labelLoading;
         private BMFTypesetData labelErrorLoading;
+        private BMFTypesetData labelServerDisabled;
 
         public bool reloadLocalScores = true;
         public bool reloadOnlineScores = true;
@@ -62,6 +63,7 @@ namespace ProjectKB.Views
             labelNoScores = KBFonts.SAEADA_600_96.Typeset("NO SCORES");
             labelLoading = KBFonts.SAEADA_600_96.Typeset("LOADING SCORES...");
             labelErrorLoading = KBFonts.SAEADA_600_96.Typeset("ERROR LOADING SCORES");
+            labelServerDisabled = KBFonts.SAEADA_600_96.Typeset("ONLINE FEATURES DISABLED");
         }
 
         private void UpdateLocalScoreTypesets(GamePresetID presetId)
@@ -100,8 +102,10 @@ namespace ProjectKB.Views
                     onlineScoreTypesets.Add(labelLoading);
                     break;
                 case FetchStatus.Error:
-                case FetchStatus.Disabled:
                     onlineScoreTypesets.Add(labelErrorLoading);
+                    break;
+                case FetchStatus.Disabled:
+                    onlineScoreTypesets.Add(labelServerDisabled);
                     break;
             }
             
@@ -232,10 +236,15 @@ namespace ProjectKB.Views
             {
                 foreach (var kvp in KBModules.ScoreBoard.scoresOnline)
                 {
-                    if (KBModules.ScoreBoard.scoresOnline[kvp.Key].a == FetchStatus.Outdated)
+                    FetchStatus k = KBModules.ScoreBoard.scoresOnline[kvp.Key].a;
+                    if (k == FetchStatus.Outdated)
                     {
                         UpdateOnlineScoresForPreset(kvp.Key);
-                    };
+                    }
+                    else if (k == FetchStatus.Disabled && kvp.Key == presets[selectedPresetIndex])
+                    {
+                        UpdateOnlineScoreTypesets(kvp.Key);
+                    }
                 }
             }
         }
