@@ -24,13 +24,13 @@ namespace ProjectKBServer.Controllers
 
             readCmd = new();
             readCmd.Connection = _conn;
-            readCmd.CommandType = System.Data.CommandType.Text;
+            readCmd.CommandType = CommandType.Text;
             readCmd.CommandText =
                 "SELECT `id`, `version`, `preset`, `playerName`, `timestamp`, `score`, `level` FROM `scores` WHERE `preset` = @preset ORDER BY `level` DESC LIMIT 10;";
 
             readAllCmd = new();
             readAllCmd.Connection = _conn;
-            readAllCmd.CommandType = System.Data.CommandType.Text;
+            readAllCmd.CommandType = CommandType.Text;
             readAllCmd.CommandText =
                 "SELECT `id`, `version`, `preset`, `playerName`, `timestamp`, `score`, `level` FROM `scores` WHERE `preset` = 1 ORDER BY `level` DESC LIMIT 10;"
                 + "SELECT `id`, `version`, `preset`, `playerName`, `timestamp`, `score`, `level` FROM `scores` WHERE `preset` = 2 ORDER BY `level` DESC LIMIT 10;"
@@ -38,7 +38,7 @@ namespace ProjectKBServer.Controllers
 
             writeCmd = new();
             writeCmd.Connection = _conn;
-            writeCmd.CommandType = System.Data.CommandType.Text;
+            writeCmd.CommandType = CommandType.Text;
             writeCmd.CommandText =
                 "INSERT INTO `scores` (`version`, `preset`, `playerName`, `timestamp`, `score`, `level`) VALUES (@version, @preset, @playerName, @timestamp, @score, @level);";
         }
@@ -46,6 +46,7 @@ namespace ProjectKBServer.Controllers
         [HttpGet("{preset}")]
         public List<DBScore> Get(byte preset)
         {
+            _conn.Open();
             readCmd.Parameters.AddWithValue("@preset", preset);
 
             List<DBScore> out_ = new();
@@ -71,6 +72,7 @@ namespace ProjectKBServer.Controllers
         [HttpGet]
         public List<DBScoresByPreset> Get()
         {
+            _conn.Open();
             List<DBScoresByPreset> out_ = new();
             MySqlDataReader reader = readAllCmd.ExecuteReader();
             byte preset = 1;
@@ -103,6 +105,7 @@ namespace ProjectKBServer.Controllers
         [HttpPost]
         public void Post(DBScore score)
         {
+            _conn.Open();
             MySqlTransaction t = _conn.BeginTransaction();
 
             writeCmd.Parameters.AddWithValue("@version", score.version);

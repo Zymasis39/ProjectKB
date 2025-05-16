@@ -24,7 +24,8 @@ namespace ProjectKB.Modules
             foreach (var val in Enum.GetValues(typeof(GamePresetID)))
             {
                 scoresLocal[(GamePresetID)val] = new List<GameResult>();
-                scoresOnline[(GamePresetID)val] = new(FetchStatus.Outdated, new List<DBScore>());
+                FetchStatus ifs = KBModules.Config.server == "NONE" ? FetchStatus.Disabled : FetchStatus.Outdated;
+                scoresOnline[(GamePresetID)val] = new(ifs, new List<DBScore>());
             }
         }
 

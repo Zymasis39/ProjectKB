@@ -165,12 +165,13 @@ namespace ProjectKB.Views
             if (board.CheckGameOver() && !over)
             {
                 over = true;
+                bool onlineEnabled = KBModules.Config.server != "NONE";
                 topLines.Add(labelGameOver);
-                topLines.Add(labelSubmitScore);
+                if (onlineEnabled) topLines.Add(labelSubmitScore);
                 topLines.Add(labelPressExit);
                 GameResult result = board.GenerateResult();
                 result.SavePlaintextFile();
-                TrySubmitScore(result);
+                if (onlineEnabled) TrySubmitScore(result);
                 KBModules.ScoreBoard.AddScore(result, out _);
                 KBModules.ScoreBoard.Save();                
 
