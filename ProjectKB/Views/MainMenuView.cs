@@ -13,6 +13,7 @@ using System.Threading.Tasks;
 using ProjectKB.Utils;
 using ProjectKBShared.Model;
 using System.Diagnostics;
+using System.Threading;
 
 namespace ProjectKB.Views
 {
@@ -36,6 +37,8 @@ namespace ProjectKB.Views
         private BMFTypesetData labelLoading;
         private BMFTypesetData labelErrorLoading;
         private BMFTypesetData labelServerDisabled;
+
+        private Mutex onlineScoreTypesetMutex = new();
 
         public bool reloadLocalScores = true;
         public bool reloadOnlineScores = true;
@@ -82,6 +85,7 @@ namespace ProjectKB.Views
 
         private void UpdateOnlineScoreTypesets(GamePresetID presetId)
         {
+            onlineScoreTypesetMutex.WaitOne();
             onlineScoreTypesets.Clear();
             switch (KBModules.ScoreBoard.scoresOnline[presetId].a)
             {
@@ -108,7 +112,7 @@ namespace ProjectKB.Views
                     onlineScoreTypesets.Add(labelServerDisabled);
                     break;
             }
-            
+            onlineScoreTypesetMutex.ReleaseMutex();
         }
 
         public void Draw() // NOTE TO SELF PLEASE FOR THE CZECH'S SAKE REFACTOR THE DRAWING CODE
@@ -165,6 +169,7 @@ namespace ProjectKB.Views
                     0f, Vector2.Zero, 0.25f, SpriteEffects.None, 0f);
             }
             y += 24;
+            onlineScoreTypesetMutex.WaitOne();
             foreach (BMFTypesetData typeset in onlineScoreTypesets)
             {
                 x = vp.Width - typeset.width * 0.25f - 16;
@@ -176,6 +181,7 @@ namespace ProjectKB.Views
                 }
                 y += 24;
             }
+            onlineScoreTypesetMutex.ReleaseMutex();
             x = 16;
             y = vp.Height - (int)(versionTypeset.height * 0.25) - 16;
             foreach (BMFTypesetGlyph glyph in versionTypeset.glyphs)
