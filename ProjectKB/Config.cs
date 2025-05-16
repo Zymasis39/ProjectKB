@@ -51,7 +51,7 @@ namespace ProjectKB
         public string server = "DEFAULT";
 
         static Regex lineRegex = new(@"^(.+?)=(.+)$", RegexOptions.IgnoreCase);
-        static Regex kvpRegex = new(@"^(.+?)=(.+)$", RegexOptions.IgnoreCase);
+        static Regex kvpRegex = new(@"^(.+?):(.+)$", RegexOptions.IgnoreCase);
 
         private Config() {
             
