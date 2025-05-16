@@ -9,7 +9,6 @@ MySqlConnection conn = new();
 try
 {
     conn.ConnectionString = builder.Configuration.GetConnectionString("ScoreDB");
-    conn.Open();
 }
 catch (MySqlException ex)
 {
