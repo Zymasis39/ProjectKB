@@ -204,14 +204,7 @@ namespace ProjectKB.Views
             float y = 16;
             foreach (var line in topLines)
             {
-                Viewport vp = KBModules.GraphicsDeviceManager.GraphicsDevice.Viewport;
-                float x = (vp.Width - (line.width) * 0.25f) / 2;
-                foreach (BMFTypesetGlyph glyph in line.glyphs)
-                {
-                    Vector2 position = glyph.offset.ToVector2() * 0.25f + new Vector2(x, y);
-                    KBModules.SpriteBatch.Draw(glyph.texture, position, glyph.sourceRect, Color.White,
-                        0f, Vector2.Zero, 0.25f, SpriteEffects.None, 0f);
-                }
+                line.Draw(0, y, viewportX: 0.5f, alignX: 0.5f, scale: 0.25f, color: Color.White);
                 y += 24;
             }
         }

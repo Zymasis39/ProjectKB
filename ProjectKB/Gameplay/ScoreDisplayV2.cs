@@ -44,36 +44,11 @@ namespace ProjectKB.Gameplay
         {
             Viewport vp = KBModules.GraphicsDeviceManager.GraphicsDevice.Viewport;
 
-            float x = 16, y = 16;
-            foreach (BMFTypesetGlyph glyph in levelLabelTypeset.glyphs)
-            {
-                Vector2 position = glyph.offset.ToVector2() * 0.5f + new Vector2(x, y);
-                KBModules.SpriteBatch.Draw(glyph.texture, position, glyph.sourceRect, Color.White,
-                    0f, Vector2.Zero, 0.5f, SpriteEffects.None, 0f);
-            }
-            y = 64;
-            foreach (BMFTypesetGlyph glyph in levelNumTypeset.glyphs)
-            {
-                Vector2 position = glyph.offset.ToVector2() + new Vector2(x, y);
-                KBModules.SpriteBatch.Draw(glyph.texture, position, glyph.sourceRect, Color.White,
-                    0f, Vector2.Zero, 1f, SpriteEffects.None, 0f);
-            }
-            x = vp.Width - 16 - (int)(garbageAmpLabelTypeset.width * 0.5f);
-            y = 16;
-            foreach (BMFTypesetGlyph glyph in garbageAmpLabelTypeset.glyphs)
-            {
-                Vector2 position = glyph.offset.ToVector2() * 0.5f + new Vector2(x, y);
-                KBModules.SpriteBatch.Draw(glyph.texture, position, glyph.sourceRect, Color.White,
-                    0f, Vector2.Zero, 0.5f, SpriteEffects.None, 0f);
-            }
-            x = vp.Width - 16 - garbageAmpTimeTypeset.width;
-            y = 64;
-            foreach (BMFTypesetGlyph glyph in garbageAmpTimeTypeset.glyphs)
-            {
-                Vector2 position = glyph.offset.ToVector2() + new Vector2(x, y);
-                KBModules.SpriteBatch.Draw(glyph.texture, position, glyph.sourceRect, Color.White,
-                    0f, Vector2.Zero, 1f, SpriteEffects.None, 0f);
-            }
+            levelLabelTypeset.Draw(16, 16, scale: 0.5f, color: Color.White);
+            levelNumTypeset.Draw(16, 64, color: Color.White);
+
+            garbageAmpLabelTypeset.Draw(-16, 16, viewportX: 1, alignX: 1, scale: 0.5f, color: Color.White);
+            garbageAmpTimeTypeset.Draw(-16, 64, viewportX: 1, alignX: 1, color: Color.White);
 
             KBModules.SpriteBatch.Draw(KBImages.WHITE1, new Rectangle(0, 128, 64, 0), Color.White);
             int barHeight = (int)(levelProgress * (vp.Height - 128));

@@ -87,7 +87,7 @@ namespace ProjectKB.Gameplay
             new Tuple<Color, Color>(
                 new Color(34, 170, 136), new Color(153, 221, 255)),
             new Tuple<Color, Color>(
-                new Color(128, 255, 17), new Color(17, 17, 17)),
+                new Color(187, 255, 17), new Color(0, 0, 0)),
             new Tuple<Color, Color>(
                 new Color(78, 0, 136), new Color(255, 51, 255)),
             new Tuple<Color, Color>(

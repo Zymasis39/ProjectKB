@@ -115,81 +115,38 @@ namespace ProjectKB.Views
             onlineScoreTypesetMutex.ReleaseMutex();
         }
 
-        public void Draw() // NOTE TO SELF PLEASE FOR THE CZECH'S SAKE REFACTOR THE DRAWING CODE
-            // YOU WENT TO SUCH GREAT LENGTHS WITH TYPESETTING AND THEN COPY AND PASTE THIS ABOMINATION OVER AND OVER FOR DRAWING
+        public void Draw()
         {
             Viewport vp = KBModules.GraphicsDeviceManager.GraphicsDevice.Viewport;
-            float x = 16, y = 16;
-            foreach (BMFTypesetGlyph glyph in line1Typeset.glyphs)
-            {
-                Vector2 position = glyph.offset.ToVector2() * 0.25f + new Vector2(x, y);
-                KBModules.SpriteBatch.Draw(glyph.texture, position, glyph.sourceRect, Color.White,
-                    0f, Vector2.Zero, 0.25f, SpriteEffects.None, 0f);
-            }
+            int y = 16;
+            line1Typeset.Draw(16, y, scale: 0.25f, color: Color.White);
             y += 32;
             int i = 0;
             foreach (BMFTypesetData typeset in presetTypesets)
             {
-                foreach (BMFTypesetGlyph glyph in typeset.glyphs)
-                {
-                    Vector2 position = glyph.offset.ToVector2() * 0.25f + new Vector2(x, y);
-                    KBModules.SpriteBatch.Draw(glyph.texture, position, glyph.sourceRect,
-                        i == selectedPresetIndex ? Color.Lime : Color.White,
-                        0f, Vector2.Zero, 0.25f, SpriteEffects.None, 0f);
-                }
+                typeset.Draw(16, y, scale: 0.25f, color: i == selectedPresetIndex ? Color.Lime : Color.White);
                 y += 24;
                 i++;
             }
             y = 16;
-            x = vp.Width - labelLocalScores.width * 0.25f - 16;
-            foreach (BMFTypesetGlyph glyph in labelLocalScores.glyphs)
-            {
-                Vector2 position = glyph.offset.ToVector2() * 0.25f + new Vector2(x, y);
-                KBModules.SpriteBatch.Draw(glyph.texture, position, glyph.sourceRect, Color.White,
-                    0f, Vector2.Zero, 0.25f, SpriteEffects.None, 0f);
-            }
+            labelLocalScores.Draw(-16, y, viewportX: 1, alignX: 1, scale: 0.25f, color: Color.White);
             y += 24;
             foreach (BMFTypesetData typeset in localScoreTypesets)
             {
-                x = vp.Width - typeset.width * 0.25f - 16;
-                foreach (BMFTypesetGlyph glyph in typeset.glyphs)
-                {
-                    Vector2 position = glyph.offset.ToVector2() * 0.25f + new Vector2(x, y);
-                    KBModules.SpriteBatch.Draw(glyph.texture, position, glyph.sourceRect, Color.White,
-                        0f, Vector2.Zero, 0.25f, SpriteEffects.None, 0f);
-                }
+                typeset.Draw(-16, y, viewportX: 1, alignX: 1, scale: 0.25f, color: Color.White);
                 y += 24;
             }
             y += 8;
-            x = vp.Width - labelOnlineScores.width * 0.25f - 16;
-            foreach (BMFTypesetGlyph glyph in labelOnlineScores.glyphs)
-            {
-                Vector2 position = glyph.offset.ToVector2() * 0.25f + new Vector2(x, y);
-                KBModules.SpriteBatch.Draw(glyph.texture, position, glyph.sourceRect, Color.White,
-                    0f, Vector2.Zero, 0.25f, SpriteEffects.None, 0f);
-            }
+            labelOnlineScores.Draw(-16, y, viewportX: 1, alignX: 1, scale: 0.25f, color: Color.White);
             y += 24;
             onlineScoreTypesetMutex.WaitOne();
             foreach (BMFTypesetData typeset in onlineScoreTypesets)
             {
-                x = vp.Width - typeset.width * 0.25f - 16;
-                foreach (BMFTypesetGlyph glyph in typeset.glyphs)
-                {
-                    Vector2 position = glyph.offset.ToVector2() * 0.25f + new Vector2(x, y);
-                    KBModules.SpriteBatch.Draw(glyph.texture, position, glyph.sourceRect, Color.White,
-                        0f, Vector2.Zero, 0.25f, SpriteEffects.None, 0f);
-                }
+                typeset.Draw(-16, y, viewportX: 1, alignX: 1, scale: 0.25f, color: Color.White);
                 y += 24;
             }
             onlineScoreTypesetMutex.ReleaseMutex();
-            x = 16;
-            y = vp.Height - (int)(versionTypeset.height * 0.25) - 16;
-            foreach (BMFTypesetGlyph glyph in versionTypeset.glyphs)
-            {
-                Vector2 position = glyph.offset.ToVector2() * 0.25f + new Vector2(x, y);
-                KBModules.SpriteBatch.Draw(glyph.texture, position, glyph.sourceRect, Color.White,
-                    0f, Vector2.Zero, 0.25f, SpriteEffects.None, 0f);
-            }
+            versionTypeset.Draw(16, -16, viewportY: 1, alignY: 1, scale: 0.25f, color: Color.White);
         }
 
         public override void OnSwitch()

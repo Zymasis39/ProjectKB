@@ -44,10 +44,10 @@ namespace ProjectKB.Gameplay
             if (vertical)
             {
                 KBModules.SpriteBatch.Draw(KBImages.GP_IND_VER,
-                    new Vector2(topLeft.X - (width + margin) * GameBoard.scale, topLeft.Y + step * c), null, new Color(255, 255, 255, 0),
+                    new Vector2(topLeft.X - (width + margin) * GameBoard.scale, topLeft.Y + step * c), null, Color.Lime,
                     0f, new Vector2(0, 0), GameBoard.scale, SpriteEffects.None, 0f);
                 KBModules.SpriteBatch.Draw(KBImages.GP_IND_VER,
-                    new Vector2(topLeft.X + step * GameBoard.DIM + margin * GameBoard.scale, topLeft.Y + step * c), null, new Color(255, 255, 255, 0),
+                    new Vector2(topLeft.X + step * GameBoard.DIM + margin * GameBoard.scale, topLeft.Y + step * c), null, Color.Lime,
                     0f, new Vector2(0, 0), GameBoard.scale, SpriteEffects.None, 0f);
                 float tx1 = topLeft.X - labelOffset, tx2 = topLeft.X + (GameBoard.DIMPX * GameBoard.scale) + labelOffset;
                 for (int iy = 0; iy < GameBoard.DIM; iy++)
@@ -56,24 +56,17 @@ namespace ProjectKB.Gameplay
                     BMFTypesetData tsd = labels[iy];
                     float txd = tsd.width * -0.5f * fontScale;
                     float ty = topLeft.Y + step * (iy + 0.5f) - tsd.height * 0.5f * fontScale;
-                    foreach (BMFTypesetGlyph glyph in tsd.glyphs)
-                    {
-                        KBModules.SpriteBatch.Draw(glyph.texture,
-                            new Vector2(tx1 + txd + glyph.offset.X * fontScale, ty + glyph.offset.Y * fontScale), glyph.sourceRect, new Color(0, 255, 0, 0),
-                            0f, Vector2.Zero, fontScale, SpriteEffects.None, 0f);
-                        KBModules.SpriteBatch.Draw(glyph.texture,
-                            new Vector2(tx2 + txd + glyph.offset.X * fontScale, ty + glyph.offset.Y * fontScale), glyph.sourceRect, new Color(0, 255, 0, 0),
-                            0f, Vector2.Zero, fontScale, SpriteEffects.None, 0f);
-                    }
+                    tsd.Draw(tx1, ty, alignX: 0.5f, alignY: 0.5f, scale: fontScale, color: Color.Lime);
+                    tsd.Draw(tx2, ty, alignX: 0.5f, alignY: 0.5f, scale: fontScale, color: Color.Lime);
                 }
             }
             else
             {
                 KBModules.SpriteBatch.Draw(KBImages.GP_IND_HOR,
-                    new Vector2(topLeft.X + step * c, topLeft.Y - (width + margin) * GameBoard.scale), null, new Color(255, 255, 255, 0),
+                    new Vector2(topLeft.X + step * c, topLeft.Y - (width + margin) * GameBoard.scale), null, Color.Lime,
                     0f, new Vector2(0, 0), GameBoard.scale, SpriteEffects.None, 0f);
                 KBModules.SpriteBatch.Draw(KBImages.GP_IND_HOR,
-                    new Vector2(topLeft.X + step * c, topLeft.Y + step * GameBoard.DIM + margin * GameBoard.scale), null, new Color(255, 255, 255, 0),
+                    new Vector2(topLeft.X + step * c, topLeft.Y + step * GameBoard.DIM + margin * GameBoard.scale), null, Color.Lime,
                     0f, new Vector2(0, 0), GameBoard.scale, SpriteEffects.None, 0f);
                 float ty1 = topLeft.Y - labelOffset, ty2 = topLeft.Y + (GameBoard.DIMPX * GameBoard.scale) + labelOffset;
                 for (int ix = 0; ix < GameBoard.DIM; ix++)
@@ -82,15 +75,8 @@ namespace ProjectKB.Gameplay
                     BMFTypesetData tsd = labels[ix];
                     float tyd = tsd.height * -0.5f * fontScale;
                     float tx = topLeft.X + step * (ix + 0.5f) - tsd.width * 0.5f * fontScale;
-                    foreach (BMFTypesetGlyph glyph in tsd.glyphs)
-                    {
-                        KBModules.SpriteBatch.Draw(glyph.texture,
-                            new Vector2(tx + glyph.offset.X * fontScale, ty1 + tyd + glyph.offset.Y * fontScale), glyph.sourceRect, new Color(0, 255, 0, 0),
-                            0f, Vector2.Zero, fontScale, SpriteEffects.None, 0f);
-                        KBModules.SpriteBatch.Draw(glyph.texture,
-                            new Vector2(tx + glyph.offset.X * fontScale, ty2 + tyd + glyph.offset.Y * fontScale), glyph.sourceRect, new Color(0, 255, 0, 0),
-                            0f, Vector2.Zero, fontScale, SpriteEffects.None, 0f);
-                    }
+                    tsd.Draw(tx, ty1, alignX: 0.5f, alignY: 0.5f, scale: fontScale, color: Color.Lime);
+                    tsd.Draw(tx, ty2, alignX: 0.5f, alignY: 0.5f, scale: fontScale, color: Color.Lime);
                 }
             }
         }
