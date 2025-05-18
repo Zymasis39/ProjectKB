@@ -28,3 +28,14 @@ The game, while in a somewhat playable state, is still very much a WIP.
 - MARATHON - Like STANDARD, but progression is 4x slower (higher level thresholds, slower progress decay, slower garbage amp).
 
 - EXPERT - Significantly harder. Starts around the difficulty of STANDARD level 12, scales faster, and has 2x shorter garbage warning times.
+
+## Configuration
+
+Upon first launch, the game creates a default configuration file, which stores game settings/preferences, in the AppData folder. The ability to edit these settings in-game hasn't been implemented yet, but you can edit the file directly.
+
+- `DISPW` and `DISPH` - window resolution in pixels (width and height respectively).
+- `FULLS` - set `1` to enable fullscreen mode.
+- `KEYS` - list of keybinds. *It is recommended not to edit this setting unless you really know what you're doing (the key actions and keys are enum values converted to ints).*
+- `FPS` - frame rate in frames/second. *It is recommended to set this to your monitor's refresh rate.*
+- `PNAME` - player name, under which new scores will be saved both locally and online. *A name longer than 16 characters will cause online score submission to fail.*
+- `SERVE` - score server address. Set `DEFAULT` to connect to the default server, or `NONE` to disable online features. If you have set up your own server, you can use its address as well.
