@@ -11,7 +11,7 @@ namespace ProjectKB
 {
     public static class KBModules
     {
-        public const string VERSION = "V250518";
+        public const string VERSION = "V250523";
 
         public static Config Config;
         public static ScoreBoard ScoreBoard;

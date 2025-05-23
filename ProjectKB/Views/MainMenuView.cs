@@ -27,6 +27,7 @@ namespace ProjectKB.Views
         private List<BMFTypesetData> presetTypesets;
         private int selectedPresetIndex = 0;
 
+        private BMFTypesetData playerNameTypeset;
         private BMFTypesetData versionTypeset;
 
         private List<BMFTypesetData> localScoreTypesets;
@@ -60,6 +61,7 @@ namespace ProjectKB.Views
             {
                 presetTypesets.Add(KBFonts.SAEADA_600_96.Typeset(presets[i].ToString()));
             }
+            playerNameTypeset = KBFonts.SAEADA_600_96.Typeset($"PLAYER NAME: {KBModules.Config.playerName}");
             versionTypeset = KBFonts.SAEADA_600_96.Typeset(KBModules.VERSION);
             labelLocalScores = KBFonts.SAEADA_600_96.Typeset("LOCAL SCORES");
             labelOnlineScores = KBFonts.SAEADA_600_96.Typeset("ONLINE SCORES");
@@ -146,6 +148,7 @@ namespace ProjectKB.Views
                 y += 24;
             }
             onlineScoreTypesetMutex.ReleaseMutex();
+            playerNameTypeset.Draw(16, -40, viewportY: 1, alignY: 1, scale: 0.25f, color: Color.White);
             versionTypeset.Draw(16, -16, viewportY: 1, alignY: 1, scale: 0.25f, color: Color.White);
         }
 

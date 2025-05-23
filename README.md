@@ -37,5 +37,5 @@ Upon first launch, the game creates a default configuration file, which stores g
 - `FULLS` - set `1` to enable fullscreen mode.
 - `KEYS` - list of keybinds. *It is recommended not to edit this setting unless you really know what you're doing (the key actions and keys are enum values converted to ints).*
 - `FPS` - frame rate in frames/second. *It is recommended to set this to your monitor's refresh rate.*
-- `PNAME` - player name, under which new scores will be saved both locally and online. *A name longer than 16 characters will cause online score submission to fail.*
+- `PNAME` - player name, under which new scores will be saved both locally and online. *This is restricted to uppercase letters, digits, dash `-` and underscore `_`. A name longer than 16 characters will cause online score submission to fail.*
 - `SERVE` - score server address. Set `DEFAULT` to connect to the default server, or `NONE` to disable online features. If you have set up your own server, you can use its address as well.

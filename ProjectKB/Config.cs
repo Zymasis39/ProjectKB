@@ -23,7 +23,7 @@ namespace ProjectKB
 
         public bool fullscreen = false;
         public int fps = 60;
-        public string playerName = "PLAYER";
+        public string playerName = "";
 
         public Dictionary<KeyAction, Keys> keybinds = new()
         {
@@ -52,6 +52,7 @@ namespace ProjectKB
 
         static Regex lineRegex = new(@"^(.+?)=(.+)$", RegexOptions.IgnoreCase);
         static Regex kvpRegex = new(@"^(.+?):(.+)$", RegexOptions.IgnoreCase);
+        static Regex pnicRegex = new(@"[^a-zA-Z0-9\-_]+", RegexOptions.IgnoreCase);
 
         private Config() {
             
@@ -114,6 +115,17 @@ namespace ProjectKB
                         }
                     }
                 }
+            }
+            if (config.playerName == "")
+            {
+                Random rng = new();
+                uint id = (uint)rng.NextInt64((long)uint.MaxValue + 1);
+                config.playerName = $"PLAYER_{id:X}";
+            }
+            else
+            {
+                config.playerName = pnicRegex.Replace(config.playerName, "").ToUpperInvariant();
+                if (config.playerName.Length > 16) config.playerName = config.playerName.Substring(0, 16);
             }
             return config;
         }
