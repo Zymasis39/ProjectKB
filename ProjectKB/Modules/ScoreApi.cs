@@ -34,6 +34,7 @@ namespace ProjectKB.Modules
             };
             req.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
             HttpResponseMessage res = await _client.SendAsync(req);
+            if (!res.IsSuccessStatusCode) throw new Exception($"API request returned code {res.StatusCode}");
             string json = await res.Content.ReadAsStringAsync();
             List<DBScore> scores = JsonConvert.DeserializeObject<List<DBScore>>(json);
             return scores;
@@ -48,6 +49,7 @@ namespace ProjectKB.Modules
             };
             req.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
             HttpResponseMessage res = await _client.SendAsync(req);
+            if (!res.IsSuccessStatusCode) throw new Exception($"API request returned code {res.StatusCode}");
             string json = await res.Content.ReadAsStringAsync();
             List<DBScoresByPreset> scores = JsonConvert.DeserializeObject<List<DBScoresByPreset>>(json);
             return scores;
@@ -62,7 +64,8 @@ namespace ProjectKB.Modules
                 Content = new StringContent(JsonConvert.SerializeObject(score)),
             };
             req.Content.Headers.ContentType = new MediaTypeWithQualityHeaderValue("application/json");
-            await _client.SendAsync(req);
+            HttpResponseMessage res = await _client.SendAsync(req);
+            if (!res.IsSuccessStatusCode) throw new Exception($"API request returned code {res.StatusCode}");
         }
 
         public async Task SubmitScore(GameResult score)

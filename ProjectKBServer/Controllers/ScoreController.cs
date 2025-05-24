@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using MySql.Data.MySqlClient;
 using ProjectKBShared.Model;
 using System.Data;
+using System.Text.RegularExpressions;
 
 namespace ProjectKBServer.Controllers
 {
@@ -15,6 +16,8 @@ namespace ProjectKBServer.Controllers
         private MySqlCommand readCmd;
         private MySqlCommand readAllCmd;
         private MySqlCommand writeCmd;
+
+        static Regex pnicRegex = new(@"[^a-zA-Z0-9\-_]+", RegexOptions.IgnoreCase);
 
         public ScoreController(ILogger<ScoreController> logger,
             MySqlConnection conn)
@@ -44,8 +47,10 @@ namespace ProjectKBServer.Controllers
         }
 
         [HttpGet("{preset}")]
-        public List<DBScore> Get(byte preset)
+        public ActionResult<List<DBScore>> Get(byte preset)
         {
+            if (preset < 1 || preset > 3) return NotFound("404 - invalid preset ID");
+
             _conn.Open();
             readCmd.Parameters.AddWithValue("@preset", preset);
 
@@ -67,11 +72,11 @@ namespace ProjectKBServer.Controllers
             reader.Close();
             _conn.Close();
 
-            return out_;
+            return Ok(out_);
         }
 
         [HttpGet]
-        public List<DBScoresByPreset> Get()
+        public ActionResult<List<DBScoresByPreset>> Get()
         {
             _conn.Open();
             List<DBScoresByPreset> out_ = new();
@@ -101,12 +106,23 @@ namespace ProjectKBServer.Controllers
             reader.Close();
             _conn.Close();
 
-            return out_;
+            return Ok(out_);
         }
 
         [HttpPost]
-        public void Post(DBScore score)
+        public ActionResult Post(DBScore score)
         {
+            // here goes data validation
+            if (score.preset < 1 || score.preset > 3
+                || score.playerName == string.Empty
+                || score.playerName.Length > 16
+                || pnicRegex.IsMatch(score.playerName)
+                || score.score < 0
+                || score.level < 0)
+                return BadRequest("400 - Invalid score data");
+
+            score.playerName = score.playerName.ToUpperInvariant();
+
             _conn.Open();
             MySqlTransaction t = _conn.BeginTransaction();
 
@@ -121,6 +137,8 @@ namespace ProjectKBServer.Controllers
 
             t.Commit();
             _conn.Close();
+
+            return NoContent();
         }
     }
 }
