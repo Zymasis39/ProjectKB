@@ -1,4 +1,5 @@
 ﻿using Microsoft.Xna.Framework.Input;
+using ProjectKB.Gameplay;
 using ProjectKB.Modules;
 using ProjectKB.Utils;
 using System;
@@ -46,9 +47,15 @@ namespace ProjectKB
             { KeyAction.MenuUp, Keys.Up },
             { KeyAction.MenuEnter, Keys.Enter },
             { KeyAction.Exit, Keys.Escape },
+            { KeyAction.PickColumnLeft, Keys.A },
+            { KeyAction.PickColumnRight, Keys.D },
+            { KeyAction.PickRowUp, Keys.W },
+            { KeyAction.PickRowDown, Keys.S },
         };
 
         public string server = "DEFAULT";
+
+        public ColumnSelectionMode selectionMode = ColumnSelectionMode.Absolute;
 
         static Regex lineRegex = new(@"^(.+?)=(.+)$", RegexOptions.IgnoreCase);
         static Regex kvpRegex = new(@"^(.+?):(.+)$", RegexOptions.IgnoreCase);
@@ -107,6 +114,9 @@ namespace ProjectKB
                                 case "SERVE":
                                     config.server = match.Groups[2].Value;
                                     break;
+                                case "CSM":
+                                    config.selectionMode = (ColumnSelectionMode)int.Parse(match.Groups[2].Value);
+                                    break;
                             }
                         }
                         catch (Exception e)
@@ -163,6 +173,7 @@ namespace ProjectKB
             fs.Write(Encoding.ASCII.GetBytes("FPS=" + fps.ToString() + "\n"));
             fs.Write(Encoding.ASCII.GetBytes("PNAME=" + playerName + "\n"));
             fs.Write(Encoding.ASCII.GetBytes("SERVE=" + server + "\n"));
+            fs.Write(Encoding.ASCII.GetBytes("CSM=" + (int)selectionMode + "\n"));
             fs.Close();
         }
 

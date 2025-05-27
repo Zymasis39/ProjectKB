@@ -68,22 +68,41 @@ namespace ProjectKB.Gameplay
             board = new GameTile[DIM * DIM];
             garbageSpawns = new GarbageSpawn[DIM * DIM];
 
-            ind_hor = new(false, 2, new string[]
+            switch (KBModules.Config.selectionMode)
             {
-                KBModules.Config.keybinds[KeyAction.PickColumn1].ToString(),
-                KBModules.Config.keybinds[KeyAction.PickColumn2].ToString(),
-                KBModules.Config.keybinds[KeyAction.PickColumn3].ToString(),
-                KBModules.Config.keybinds[KeyAction.PickColumn4].ToString(),
-                KBModules.Config.keybinds[KeyAction.PickColumn5].ToString(),
-            });
-            ind_ver = new(true, 2, new string[]
-            {
-                KBModules.Config.keybinds[KeyAction.PickRow1].ToString(),
-                KBModules.Config.keybinds[KeyAction.PickRow2].ToString(),
-                KBModules.Config.keybinds[KeyAction.PickRow3].ToString(),
-                KBModules.Config.keybinds[KeyAction.PickRow4].ToString(),
-                KBModules.Config.keybinds[KeyAction.PickRow5].ToString(),
-            });
+                case ColumnSelectionMode.Absolute:
+                    ind_hor = new(false, 2, ColumnSelectionMode.Absolute, new string[]
+                    {
+                        KBModules.Config.keybinds[KeyAction.PickColumn1].ToString(),
+                        KBModules.Config.keybinds[KeyAction.PickColumn2].ToString(),
+                        KBModules.Config.keybinds[KeyAction.PickColumn3].ToString(),
+                        KBModules.Config.keybinds[KeyAction.PickColumn4].ToString(),
+                        KBModules.Config.keybinds[KeyAction.PickColumn5].ToString(),
+                    });
+                    ind_ver = new(true, 2, ColumnSelectionMode.Absolute, new string[]
+                    {
+                        KBModules.Config.keybinds[KeyAction.PickRow1].ToString(),
+                        KBModules.Config.keybinds[KeyAction.PickRow2].ToString(),
+                        KBModules.Config.keybinds[KeyAction.PickRow3].ToString(),
+                        KBModules.Config.keybinds[KeyAction.PickRow4].ToString(),
+                        KBModules.Config.keybinds[KeyAction.PickRow5].ToString(),
+                    });
+                    break;
+                default:
+                    ind_hor = new(false, 2, ColumnSelectionMode.Relative, new string[]
+                    {
+                        KBModules.Config.keybinds[KeyAction.PickColumnLeft].ToString(),
+                        KBModules.Config.keybinds[KeyAction.PickColumnRight].ToString(),
+                    });
+                    ind_ver = new(true, 2, ColumnSelectionMode.Relative, new string[]
+                    {
+                        KBModules.Config.keybinds[KeyAction.PickRowUp].ToString(),
+                        KBModules.Config.keybinds[KeyAction.PickRowDown].ToString(),
+                    });
+                    break;
+            }
+
+            
             ind_spawn = new(spawnQueueSize);
             // scoreDisplay = new();
             // ScoreDisplay.InitTypeset();

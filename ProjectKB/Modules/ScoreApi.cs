@@ -78,7 +78,8 @@ namespace ProjectKB.Modules
                 playerName = score.playerName,
                 timestamp = score.ts,
                 score = score.score,
-                level = score.level
+                level = score.level,
+                selectionMode = (byte)KBModules.Config.selectionMode
             });
         }
     }

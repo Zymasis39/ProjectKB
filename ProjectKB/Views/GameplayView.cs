@@ -66,6 +66,8 @@ namespace ProjectKB.Views
 
             board = new GameBoard(GamePreset.Get(presetId));
             DLM.AddToLayer(board, 0);
+            ox = 2;
+            oy = 2;
 
             over = false;
             paused = false;
@@ -74,7 +76,10 @@ namespace ProjectKB.Views
 
         public override void OnSwitch()
         {
-            KBModules.KeyboardManager.LoadKeyActionList(KeyActionLists.GameplayAbsolute);
+            List<KeyAction> kal = KBModules.Config.selectionMode == ColumnSelectionMode.Absolute
+                ? KeyActionLists.GameplayAbsolute
+                : KeyActionLists.GameplayRelative;
+            KBModules.KeyboardManager.LoadKeyActionList(kal);
         }
 
         public override void Update(GameTime gt)
@@ -150,6 +155,18 @@ namespace ProjectKB.Views
                         break;
                     case KeyAction.PickColumn5:
                         ox = 4;
+                        break;
+                    case KeyAction.PickRowUp:
+                        oy = (oy + 4) % 5;
+                        break;
+                    case KeyAction.PickRowDown:
+                        oy = (oy + 1) % 5;
+                        break;
+                    case KeyAction.PickColumnLeft:
+                        ox = (ox + 4) % 5;
+                        break;
+                    case KeyAction.PickColumnRight:
+                        ox = (ox + 1) % 5;
                         break;
                 }
                 if (ox != pox)
