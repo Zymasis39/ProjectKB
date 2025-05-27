@@ -29,21 +29,21 @@ namespace ProjectKBServer.Controllers
             readCmd.Connection = _conn;
             readCmd.CommandType = CommandType.Text;
             readCmd.CommandText =
-                "SELECT t.`id`, t.`version`, t.`preset`, t.`playerName`, t.`timestamp`, t.`score`, t.`level` FROM (SELECT *, dense_rank() OVER (PARTITION BY playerName ORDER BY level DESC, id DESC) AS `rank` FROM `scores` WHERE `preset` = @preset) t WHERE t.`rank` = 1 ORDER BY t.`level` DESC LIMIT 10;";
+                "SELECT t.`id`, t.`version`, t.`preset`, t.`selectionMode`, t.`playerName`, t.`timestamp`, t.`score`, t.`level` FROM (SELECT *, dense_rank() OVER (PARTITION BY playerName ORDER BY level DESC, id DESC) AS `rank` FROM `scores` WHERE `preset` = @preset) t WHERE t.`rank` = 1 ORDER BY t.`level` DESC LIMIT 10;";
 
             readAllCmd = new();
             readAllCmd.Connection = _conn;
             readAllCmd.CommandType = CommandType.Text;
             readAllCmd.CommandText =
-                "SELECT t.`id`, t.`version`, t.`preset`, t.`playerName`, t.`timestamp`, t.`score`, t.`level` FROM (SELECT *, dense_rank() OVER (PARTITION BY playerName ORDER BY level DESC, id DESC) AS `rank` FROM `scores` WHERE `preset` = 1) t WHERE t.`rank` = 1 ORDER BY t.`level` DESC LIMIT 10;"
-                + "SELECT t.`id`, t.`version`, t.`preset`, t.`playerName`, t.`timestamp`, t.`score`, t.`level` FROM (SELECT *, dense_rank() OVER (PARTITION BY playerName ORDER BY level DESC, id DESC) AS `rank` FROM `scores` WHERE `preset` = 2) t WHERE t.`rank` = 1 ORDER BY t.`level` DESC LIMIT 10;"
-                + "SELECT t.`id`, t.`version`, t.`preset`, t.`playerName`, t.`timestamp`, t.`score`, t.`level` FROM (SELECT *, dense_rank() OVER (PARTITION BY playerName ORDER BY level DESC, id DESC) AS `rank` FROM `scores` WHERE `preset` = 3) t WHERE t.`rank` = 1 ORDER BY t.`level` DESC LIMIT 10;";
+                "SELECT t.`id`, t.`version`, t.`preset`, t.`selectionMode`, t.`playerName`, t.`timestamp`, t.`score`, t.`level` FROM (SELECT *, dense_rank() OVER (PARTITION BY playerName ORDER BY level DESC, id DESC) AS `rank` FROM `scores` WHERE `preset` = 1) t WHERE t.`rank` = 1 ORDER BY t.`level` DESC LIMIT 10;"
+                + "SELECT t.`id`, t.`version`, t.`preset`, t.`selectionMode`, t.`playerName`, t.`timestamp`, t.`score`, t.`level` FROM (SELECT *, dense_rank() OVER (PARTITION BY playerName ORDER BY level DESC, id DESC) AS `rank` FROM `scores` WHERE `preset` = 2) t WHERE t.`rank` = 1 ORDER BY t.`level` DESC LIMIT 10;"
+                + "SELECT t.`id`, t.`version`, t.`preset`, t.`selectionMode`, t.`playerName`, t.`timestamp`, t.`score`, t.`level` FROM (SELECT *, dense_rank() OVER (PARTITION BY playerName ORDER BY level DESC, id DESC) AS `rank` FROM `scores` WHERE `preset` = 3) t WHERE t.`rank` = 1 ORDER BY t.`level` DESC LIMIT 10;";
 
             writeCmd = new();
             writeCmd.Connection = _conn;
             writeCmd.CommandType = CommandType.Text;
             writeCmd.CommandText =
-                "INSERT INTO `scores` (`version`, `preset`, `playerName`, `timestamp`, `score`, `level`) VALUES (@version, @preset, @playerName, @timestamp, @score, @level);";
+                "INSERT INTO `scores` (`version`, `preset`, `selectionMode`, `playerName`, `timestamp`, `score`, `level`) VALUES (@version, @preset, @selectionMode, @playerName, @timestamp, @score, @level);";
         }
 
         [HttpGet("{preset}")]
@@ -63,10 +63,11 @@ namespace ProjectKBServer.Controllers
                     id = reader.GetUInt64(0),
                     version = reader.GetString(1),
                     preset = reader.GetByte(2),
-                    playerName = reader.GetString(3),
-                    timestamp = reader.GetDateTime(4),
-                    score = reader.GetDouble(5),
-                    level = reader.GetDouble(6)
+                    selectionMode = reader.GetByte(3),
+                    playerName = reader.GetString(4),
+                    timestamp = reader.GetDateTime(5),
+                    score = reader.GetDouble(6),
+                    level = reader.GetDouble(7)
                 });
             }
             reader.Close();
@@ -92,10 +93,11 @@ namespace ProjectKBServer.Controllers
                         id = reader.GetUInt64(0),
                         version = reader.GetString(1),
                         preset = reader.GetByte(2),
-                        playerName = reader.GetString(3),
-                        timestamp = reader.GetDateTime(4),
-                        score = reader.GetDouble(5),
-                        level = reader.GetDouble(6)
+                        selectionMode = reader.GetByte(3),
+                        playerName = reader.GetString(4),
+                        timestamp = reader.GetDateTime(5),
+                        score = reader.GetDouble(6),
+                        level = reader.GetDouble(7)
                     });
                 }
                 out_.Add(new() { preset = preset, scores = outPreset });
@@ -113,7 +115,10 @@ namespace ProjectKBServer.Controllers
         public ActionResult Post(DBScore score)
         {
             // here goes data validation
+            if (score.selectionMode == null) score.selectionMode = 1;
+
             if (score.preset < 1 || score.preset > 3
+                || score.selectionMode < 1 || score.selectionMode > 2
                 || score.playerName == string.Empty
                 || score.playerName.Length > 16
                 || pnicRegex.IsMatch(score.playerName)
@@ -128,6 +133,7 @@ namespace ProjectKBServer.Controllers
 
             writeCmd.Parameters.AddWithValue("@version", score.version);
             writeCmd.Parameters.AddWithValue("@preset", score.preset);
+            writeCmd.Parameters.AddWithValue("@selectionMode", score.selectionMode);
             writeCmd.Parameters.AddWithValue("@playerName", score.playerName);
             writeCmd.Parameters.AddWithValue("@timestamp", score.timestamp);
             writeCmd.Parameters.AddWithValue("@score", score.score);

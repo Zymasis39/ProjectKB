@@ -36,5 +36,19 @@ namespace ProjectKB.Modules
             KeyAction.Pause,
             KeyAction.Exit
         };
+
+        public static List<KeyAction> GameplayRelative = new()
+        {
+            KeyAction.MoveLeft,
+            KeyAction.MoveRight,
+            KeyAction.MoveUp,
+            KeyAction.MoveDown,
+            KeyAction.PickColumnLeft,
+            KeyAction.PickColumnRight,
+            KeyAction.PickRowUp,
+            KeyAction.PickRowDown,
+            KeyAction.Pause,
+            KeyAction.Exit
+        };
     }
 }

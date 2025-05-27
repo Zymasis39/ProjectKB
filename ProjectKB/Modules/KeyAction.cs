@@ -26,6 +26,10 @@ namespace ProjectKB.Modules
         MenuUp,
         MenuDown,
         MenuEnter,
-        Exit
+        Exit,
+        PickRowUp,
+        PickRowDown,
+        PickColumnLeft,
+        PickColumnRight
     }
 }
