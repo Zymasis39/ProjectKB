@@ -6,10 +6,12 @@ The game, while in a somewhat playable state, is still very much a WIP.
 
 ## Gameplay
 
-- Use keyboard keys to select a column or row, and to move tiles in the selected column or row. The default keys are:
- - Arrows - move tiles in column/row
- - `1`/`Q`/`2`/`W`/`3` - select row, specified from top to bottom
- - `A`/`Z`/`S`/`X`/`D` - select column, specified from left to right
+- Use keyboard keys to select a column or row, and to move tiles in the selected column or row. By default:
+ - arrow keys move tiles in the selected column or row;
+ - in **absolute** row/column selection mode, rows are selected with `1`/`Q`/`2`/`W`/`3` (top to bottom), and columns by `A`/`Z`/`S`/`X`/`D` (left to right).
+ - in **relative** row/column selection mode, the current row/column selection can be moved with `W/S/A/D`.
+ - **Relative** mode is easier to get used to, but has a lower speed potential, than **absolute** mode. *See the Configuration section for info on setting the row/column selection mode.*
+ - Press `P` to pause, and `Esc` to exit while paused.
 
 - There is a limited number (6) of tiers of tiles that can be merged.
 
@@ -39,3 +41,4 @@ Upon first launch, the game creates a default configuration file, which stores g
 - `FPS` - frame rate in frames/second. *It is recommended to set this to your monitor's refresh rate.*
 - `PNAME` - player name, under which new scores will be saved both locally and online. *This is restricted to uppercase letters, digits, dash `-` and underscore `_`. A name longer than 16 characters will cause online score submission to fail.*
 - `SERVE` - score server address. Set `DEFAULT` to connect to the default server, or `NONE` to disable online features. If you have set up your own server, you can use its address as well.
+- `CSM` - row/column selection mode; `1` for absolute, `2` for relative.
